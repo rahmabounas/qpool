@@ -17,7 +17,7 @@ GITHUB_BRANCH = "main"
 
 # Setup page
 st.set_page_config(
-    page_title="Live Monero Pool Dashboard",
+    page_title="Qubic Monero Pool Dashboard",
     page_icon="⛏️",
     layout="wide"
 )
