@@ -143,7 +143,7 @@ if not df.empty:
         fig.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             xaxis_title=None,
-            margin=dict(t=20, b=20)
+            margin=dict(t=20, b=20))
         st.plotly_chart(fig, use_container_width=True, key="blocks_chart")
 else:
     st.warning("No data available. Waiting for first data points...")
