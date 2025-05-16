@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 
 # Configuration
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/data/pool_stats.csv"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
