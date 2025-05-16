@@ -10,8 +10,8 @@ GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/m
 REFRESH_INTERVAL = 5  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
-GITHUB_OWNER = "your_github_username"
-GITHUB_REPO = "your_repo_name"
+GITHUB_OWNER = "B4k469420"
+GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
 
 # Set up page
