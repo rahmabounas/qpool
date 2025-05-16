@@ -14,6 +14,7 @@ GITHUB_OWNER = "B4k469420"
 GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
 
+
 # Setup page
 st.set_page_config(
     page_title="Live Monero Pool Dashboard",
@@ -21,7 +22,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for better visuals
+# Custom CSS
 st.markdown("""
 <style>
     .metric-card {
@@ -29,7 +30,6 @@ st.markdown("""
         border-radius: 10px;
         padding: 1.5rem;
         margin-bottom: 1rem;
-        backdrop-filter: blur(5px);
         border: 1px solid rgba(255,255,255,0.1);
     }
     .metric-value {
@@ -38,9 +38,9 @@ st.markdown("""
         color: #4cc9f0;
         margin: 0.5rem 0;
     }
-    .stAlert { border-radius: 10px; }
-    [data-testid="stExpander"] .streamlit-expanderHeader {
-        background-color: rgba(22, 33, 62, 0.5);
+    .block-indicator {
+        color: #f72585;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -67,7 +67,7 @@ def load_data():
         
         # Calculate blocks
         df['cumulative_blocks'] = df['blocks_found'].cumsum()
-        df['new_blocks'] = df['blocks_found'].diff().fillna(0)
+        df['block_found'] = df['blocks_found'].diff().fillna(0) > 0
         
         return df
     except Exception as e:
@@ -111,44 +111,50 @@ if not df.empty:
         """, unsafe_allow_html=True)
     
     with cols[2]:
+        block_status = "🟢 Found!" if latest['block_found'] else "🔴 Searching"
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
             <div class="metric-value">{int(latest['cumulative_blocks'])}</div>
-            <div>+{int(latest['new_blocks'])} since last update</div>
+            <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
     
-    # Charts
-    with st.expander("📈 Hashrate Trends", expanded=True):
-        fig = px.line(df, x='timestamp', 
-                    y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
-                    labels={'value': 'Hashrate', 'variable': ''},
-                    color_discrete_map={
-                        'pool_hashrate_mhs': '#4cc9f0',
-                        'network_hashrate_ghs': '#f72585'
-                    })
-        fig.update_layout(
-            hovermode="x unified",
-            plot_bgcolor='rgba(0,0,0,0)',
-            legend=dict(orientation="h", y=1.1),
-            margin=dict(t=20, b=20)
-        )
-        st.plotly_chart(fig, use_container_width=True, key="hashrate_chart")
+    # Hashrate Trends with Block Indicators
+    fig = px.line(df, x='timestamp', 
+                 y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
+                 labels={'value': 'Hashrate', 'variable': ''},
+                 color_discrete_map={
+                     'pool_hashrate_mhs': '#4cc9f0',
+                     'network_hashrate_ghs': '#f72585'
+                 })
     
-    with st.expander("🧱 Block Discovery", expanded=True):
-        fig = px.bar(df[df['new_blocks'] > 0], x='timestamp', y='new_blocks',
-                    labels={'new_blocks': 'Blocks Found'},
-                    color_discrete_sequence=['#7209b7'])
-        fig.update_layout(
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis_title=None,
-            margin=dict(t=20, b=20))
-        st.plotly_chart(fig, use_container_width=True, key="blocks_chart")
+    # Add block indicators as stars
+    block_times = df[df['block_found']]['timestamp']
+    for block_time in block_times:
+        fig.add_annotation(
+            x=block_time,
+            y=df[df['timestamp'] == block_time]['pool_hashrate_mhs'].values[0],
+            text="⭐",
+            showarrow=True,
+            arrowhead=1,
+            ax=0,
+            ay=-40,
+            font=dict(size=20, color="#FFD700")
+        )
+    
+    fig.update_layout(
+        hovermode="x unified",
+        plot_bgcolor='rgba(0,0,0,0)',
+        legend=dict(orientation="h", y=1.1),
+        margin=dict(t=20, b=20)
+    )
+    st.plotly_chart(fig, use_container_width=True, key="hashrate_chart")
+
 else:
     st.warning("No data available. Waiting for first data points...")
 
-# Auto-refresh logic
+# Auto-refresh
 if st.button("🔄 Manual Refresh"):
     st.cache_data.clear()
     st.rerun()
