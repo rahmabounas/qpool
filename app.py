@@ -2,17 +2,16 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import requests
-import base64
-from datetime import datetime
 import time
+from datetime import datetime
 
 # Configuration
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/{owner}/{repo}/{branch}/data/pool_stats.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
-GITHUB_OWNER = "B4k469420"
-GITHUB_REPO = "qpool"
+GITHUB_OWNER = "your_github_username"
+GITHUB_REPO = "your_repo_name"
 GITHUB_BRANCH = "main"
 
 # Set up page
@@ -22,14 +21,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom CSS for beautiful styling
+# Custom CSS
 st.markdown("""
 <style>
-    .header-style {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
     .metric-card {
         background-color: #1a1a2e;
         border-radius: 10px;
@@ -46,16 +40,10 @@ st.markdown("""
         font-size: 14px;
         color: #a8dadc;
     }
-    .plot-container {
-        background-color: #16213e;
-        border-radius: 10px;
-        padding: 20px;
-        margin-top: 20px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data(ttl=300)  # Cache data for 5 minutes
+@st.cache_data(ttl=300)
 def load_data_from_github():
     url = GITHUB_RAW_URL.format(
         owner=GITHUB_OWNER,
@@ -63,19 +51,12 @@ def load_data_from_github():
         branch=GITHUB_BRANCH
     )
     try:
-        response = requests.get(url)
-        response.raise_for_status()
         df = pd.read_csv(url)
-        
-        # Convert and clean data
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df.sort_values('timestamp')
-        df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6  # Convert to MH/s
-        df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9  # Convert to GH/s
-        
-        # Calculate cumulative blocks
+        df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
+        df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['cumulative_blocks'] = df['blocks_found'].cumsum()
-        
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -91,103 +72,88 @@ def format_hashrate(h):
     else:
         return f"{h:.2f} H/s"
 
-# App layout
+# Initialize session state
+if 'last_refresh' not in st.session_state:
+    st.session_state.last_refresh = 0
+
+# Main app layout
 st.title("⛏️ Monero Pool Dashboard")
 st.markdown("---")
 
-# Create placeholder elements
-current_stats_placeholder = st.empty()
-chart_placeholder1 = st.empty()
-chart_placeholder2 = st.empty()
+# Create containers for dynamic content
+current_stats = st.container()
+chart_container1 = st.container()
+chart_container2 = st.container()
 
-# Main loop
-while True:
-    # Load data
-    df = load_data_from_github()
-    
-    # Display current stats if available
+# Load data
+df = load_data_from_github()
+
+# Display current stats
+with current_stats:
     if not df.empty:
         latest = df.iloc[-1]
+        cols = st.columns(3)
+        with cols[0]:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">POOL HASHRATE</div>
+                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
         
-        with current_stats_placeholder.container():
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-label">POOL HASHRATE</div>
-                    <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col2:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-label">NETWORK HASHRATE</div>
-                    <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            with col3:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-label">BLOCKS FOUND</div>
-                    <div class="metric-value">{int(latest['cumulative_blocks'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    # Create visualizations
-    if not df.empty:
-        with chart_placeholder1.container():
-            st.markdown('<div class="header-style">Hashrate Comparison</div>', unsafe_allow_html=True)
-            
-            # Create figure with secondary y-axis
-            fig = px.line(df, x='timestamp', 
-                          y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
-                          labels={
-                              'value': 'Hashrate',
-                              'variable': 'Metric',
-                              'pool_hashrate_mhs': 'Pool (MH/s)',
-                              'network_hashrate_ghs': 'Network (GH/s)'
-                          },
-                          color_discrete_sequence=['#4cc9f0', '#f72585'])
-            
-            # Update layout
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                legend=dict(
-                    orientation="h",
-                    yanchor="bottom",
-                    y=1.02,
-                    xanchor="right",
-                    x=1
-                ),
-                hovermode="x unified",
-                margin=dict(l=20, r=20, t=30, b=20)
-            )
-            
-            st.plotly_chart(fig, use_container_width=True)
+        with cols[1]:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">NETWORK HASHRATE</div>
+                <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
         
-        with chart_placeholder2.container():
-            st.markdown('<div class="header-style">Blocks Found Over Time</div>', unsafe_allow_html=True)
-            
-            fig = px.area(df, x='timestamp', y='cumulative_blocks',
-                          labels={'cumulative_blocks': 'Total Blocks Found'},
-                          color_discrete_sequence=['#7209b7'])
-            
-            fig.update_layout(
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                showlegend=False,
-                hovermode="x",
-                margin=dict(l=20, r=20, t=30, b=20)
-            )
-            
-            fig.update_traces(hovertemplate="%{y} blocks")
-            st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("No data available yet. Please check back later.")
+        with cols[2]:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-label">BLOCKS FOUND</div>
+                <div class="metric-value">{int(latest['cumulative_blocks'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+# Create visualizations
+if not df.empty:
+    with chart_container1:
+        st.subheader("Hashrate Comparison")
+        fig1 = px.line(df, x='timestamp', 
+                      y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
+                      labels={
+                          'value': 'Hashrate',
+                          'variable': 'Metric',
+                          'pool_hashrate_mhs': 'Pool (MH/s)',
+                          'network_hashrate_ghs': 'Network (GH/s)'
+                      },
+                      color_discrete_sequence=['#4cc9f0', '#f72585'])
+        fig1.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            hovermode="x unified"
+        )
+        st.plotly_chart(fig1, use_container_width=True, key="hashrate_chart")
     
-    # Wait before refreshing
-    time.sleep(REFRESH_INTERVAL)
+    with chart_container2:
+        st.subheader("Blocks Found Over Time")
+        fig2 = px.area(df, x='timestamp', y='cumulative_blocks',
+                      labels={'cumulative_blocks': 'Total Blocks Found'},
+                      color_discrete_sequence=['#7209b7'])
+        fig2.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            showlegend=False,
+            hovermode="x"
+        )
+        st.plotly_chart(fig2, use_container_width=True, key="blocks_chart")
+else:
+    st.warning("No data available yet. Please check back later.")
+
+# Auto-refresh logic
+if time.time() - st.session_state.last_refresh > REFRESH_INTERVAL:
+    st.session_state.last_refresh = time.time()
+    st.rerun()
