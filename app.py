@@ -97,10 +97,7 @@ def format_hashrate(h):
 # Main app
 st.title("⛏️ Live Monero Pool Dashboard")
 st.caption(f"Updated every 10 seconds (data collected/presented with some delay) | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
-# Auto-refresh
-if st.button("🔄 Manual Refresh"):
-    st.cache_data.clear()
-    st.rerun()
+
 # Load data
 df = load_data()
 
@@ -167,6 +164,9 @@ if not df.empty:
         margin=dict(t=20, b=20)
     )
     st.plotly_chart(fig, use_container_width=True, key="hashrate_chart")
-
+# Auto-refresh
+if st.button("🔄 Manual Refresh"):
+    st.cache_data.clear()
+    st.rerun()
 else:
     st.warning("No data available. Waiting for first data points...")
