@@ -29,25 +29,49 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
+    body, .main, .block-container {
+        background-color: #202e3c !important;
+        color: white !important;
+    }
+
     .metric-card {
-        background: rgba(26, 26, 46, 0.7);
+        background: rgba(32, 46, 60, 0.9);
         border-radius: 10px;
-        padding: 1.5rem;
+        padding: 1rem;
         margin-bottom: 1rem;
         border: 1px solid rgba(255,255,255,0.1);
+        color: white;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
+
+    .metric-card div {
+        color: white;
+    }
+
     .metric-value {
-        font-size: 2rem;
+        font-size: 1.8rem;
         font-weight: bold;
         color: #4cc9f0;
-        margin: 0.5rem 0;
+        margin: 0.2rem 0;
     }
+
+    .delta-value {
+        text-align: right;
+        font-size: 0.9rem;
+        color: gray;
+        margin-top: auto;
+    }
+
     .block-indicator {
         color: #f72585;
         font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 @st.cache_data(ttl=10, show_spinner="Loading latest data...")
 def load_data():
