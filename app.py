@@ -87,7 +87,6 @@ def format_hashrate(h):
 st.title("⛏️ Qubic Monero Pool Stats")
 
 # Load data
-@st.cache_data(ttl=5)
 df = load_data()
 
 if not df.empty:
