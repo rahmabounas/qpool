@@ -17,17 +17,6 @@ GITHUB_OWNER = "B4k469420"
 GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
 
-# Add this near the top of your script
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
-
-# Calculate elapsed time
-elapsed = time.time() - st.session_state.last_refresh
-
-# If REFRESH_INTERVAL has passed, rerun the app
-if elapsed > REFRESH_INTERVAL:
-    st.session_state.last_refresh = time.time()
-    st.rerun()
 
 
 # Setup page
@@ -60,7 +49,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data(ttl=1, show_spinner="Loading latest data...")
+@st.cache_data(ttl=3, show_spinner="Loading latest data...")
 def load_data():
     url = GITHUB_RAW_URL.format(
         owner=GITHUB_OWNER,
