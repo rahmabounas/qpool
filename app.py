@@ -27,7 +27,7 @@ elapsed = time.time() - st.session_state.last_refresh
 # If REFRESH_INTERVAL has passed, rerun the app
 if elapsed > REFRESH_INTERVAL:
     st.session_state.last_refresh = time.time()
-    st.experimental_rerun()
+    st.rerun()
 
 
 # Setup page
