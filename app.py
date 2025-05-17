@@ -7,7 +7,7 @@ from datetime import datetime
 
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
-REFRESH_INTERVAL = 5  # seconds
+REFRESH_INTERVAL = 10  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
 GITHUB_OWNER = "B4k469420"
