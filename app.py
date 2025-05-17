@@ -135,21 +135,34 @@ if not df.empty:
         """, unsafe_allow_html=True)
 
     # Hashrate Trends with Block Indicators
-    fig = px.line(
-        df, x='timestamp',
-        y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
-        labels={'value': 'Hashrate', 'variable': ''},
-        color_discrete_map={
-            'pool_hashrate_mhs': '#4cc9f0',
-            'network_hashrate_ghs': '#f72585'
-        }
-    )
-
+    # Create a blank figure
+    fig = go.Figure()
+    
+    # Add smoothed pool hashrate line
+    fig.add_trace(go.Scatter(
+        x=df['timestamp'],
+        y=df['pool_hashrate_mhs'],
+        mode='lines',
+        name='Pool Hashrate (MH/s)',
+        line=dict(color='#4cc9f0', shape='spline', smoothing=1.3)
+    ))
+    
+    # Add smoothed network hashrate line
+    fig.add_trace(go.Scatter(
+        x=df['timestamp'],
+        y=df['network_hashrate_ghs'],
+        mode='lines',
+        name='Network Hashrate (GH/s)',
+        line=dict(color='#f72585', shape='spline', smoothing=1.3)
+    ))
+    
+    # Add annotations for blocks found
     block_times = df[df['block_found']]['timestamp']
     for block_time in block_times:
+        pool_value = df[df['timestamp'] == block_time]['pool_hashrate_mhs'].values[0]
         fig.add_annotation(
             x=block_time,
-            y=df[df['timestamp'] == block_time]['pool_hashrate_mhs'].values[0],
+            y=pool_value,
             text="⭐",
             showarrow=True,
             arrowhead=1,
@@ -157,7 +170,8 @@ if not df.empty:
             ay=-40,
             font=dict(size=20, color="#FFD700")
         )
-
+    
+    # Layout updates
     fig.update_layout(
         hovermode="x unified",
         plot_bgcolor='#202e3c',
