@@ -116,7 +116,7 @@ if not df.empty:
         block_status = "🟢 Found!" if latest['block_found'] else "🔴 Searching"
         st.markdown(f"""
         <div class="metric-card">
-            <div>CURRENT BLOCKS</div>
+            <div>BLOCKS FOUND</div>
             <div class="metric-value">{int(latest['blocks_found'])}</div>
             <div class="block-indicator">{block_status}</div>
         </div>
