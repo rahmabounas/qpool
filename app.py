@@ -5,6 +5,9 @@ import requests
 import time
 from datetime import datetime
 
+
+
+
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
 REFRESH_INTERVAL = 10  # seconds
@@ -13,6 +16,19 @@ REFRESH_INTERVAL = 10  # seconds
 GITHUB_OWNER = "B4k469420"
 GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
+
+# Add this near the top of your script
+if "last_refresh" not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+# Calculate elapsed time
+elapsed = time.time() - st.session_state.last_refresh
+
+# If REFRESH_INTERVAL has passed, rerun the app
+if elapsed > REFRESH_INTERVAL:
+    st.session_state.last_refresh = time.time()
+    st.experimental_rerun()
+
 
 # Setup page
 st.set_page_config(
@@ -154,12 +170,3 @@ if not df.empty:
 
 else:
     st.warning("No data available. Waiting for first data points...")
-
-# JavaScript auto-refresh
-st.components.v1.html(f"""
-<script>
-    setTimeout(function(){{
-        window.location.reload();
-    }}, {REFRESH_INTERVAL * 1000});
-</script>
-""", height=0)
