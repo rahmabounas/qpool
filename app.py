@@ -66,7 +66,6 @@ def load_data():
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         
         # Calculate blocks
-        df['cumulative_blocks'] = df['blocks_found'].cumsum()
         df['block_found'] = df['blocks_found'].diff().fillna(0) > 0
         
         return df
@@ -83,7 +82,10 @@ def format_hashrate(h):
 # Main app
 st.title("⛏️ Live Monero Pool Dashboard")
 st.caption(f"Updated every {REFRESH_INTERVAL} seconds | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
-
+# Auto-refresh
+if st.button("🔄 Manual Refresh"):
+    st.cache_data.clear()
+    st.rerun()
 # Load data
 df = load_data()
 
@@ -154,10 +156,7 @@ if not df.empty:
 else:
     st.warning("No data available. Waiting for first data points...")
 
-# Auto-refresh
-if st.button("🔄 Manual Refresh"):
-    st.cache_data.clear()
-    st.rerun()
+
 
 # JavaScript auto-refresh
 st.components.v1.html(f"""
