@@ -5,19 +5,14 @@ import requests
 import time
 from datetime import datetime
 
-
-
-
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
 REFRESH_INTERVAL = 5  # seconds
 
-# GitHub settings - REPLACE THESE WITH YOUR INFO
+# GitHub settings
 GITHUB_OWNER = "B4k469420"
 GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
-
-
 
 # Setup page
 st.set_page_config(
@@ -47,10 +42,6 @@ st.markdown("""
         justify-content: space-between;
     }
 
-    .metric-card div {
-        color: white;
-    }
-
     .metric-value {
         font-size: 1.8rem;
         font-weight: bold;
@@ -72,7 +63,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 @st.cache_data(ttl=10, show_spinner="Loading latest data...")
 def load_data():
     url = GITHUB_RAW_URL.format(
@@ -81,21 +71,16 @@ def load_data():
         branch=GITHUB_BRANCH
     )
     try:
-        # Add cache-busting parameter
         timestamp = int(time.time())
         df = pd.read_csv(f"{url}?t={timestamp}")
-        
-        # Data processing
+
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df = df.sort_values('timestamp').reset_index(drop=True)
-        
-        # Convert hashrates
+
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
-        
-        # Calculate if a block was found in this interval
         df['block_found'] = df['blocks_found'].diff().fillna(0) > 0
-        
+
         return df
     except Exception as e:
         st.error(f"⚠️ Data loading error: {str(e)}")
@@ -110,32 +95,30 @@ def format_hashrate(h):
 # Main app
 st.title("⛏️ Qubic Monero Pool Stats")
 
-# Load data
 df = load_data()
 
 if not df.empty:
     latest = df.iloc[-1]
-    
-    # Current stats row
+
     cols = st.columns(3)
     with cols[0]:
         st.markdown(f"""
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div>Δ {df['pool_hashrate_mhs'].diff().iloc[-1]:+.2f} MH/s</div>
+            <div class="delta-value">Δ {df['pool_hashrate_mhs'].diff().iloc[-1]:+.2f} MH/s</div>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with cols[1]:
         st.markdown(f"""
         <div class="metric-card">
             <div>NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div>Δ {df['network_hashrate_ghs'].diff().iloc[-1]:+.2f} GH/s</div>
+            <div class="delta-value">Δ {df['network_hashrate_ghs'].diff().iloc[-1]:+.2f} GH/s</div>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with cols[2]:
         block_status = "🟢 Found!" if latest['block_found'] else "🔴 Searching"
         st.markdown(f"""
@@ -145,17 +128,18 @@ if not df.empty:
             <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
-    
+
     # Hashrate Trends with Block Indicators
-    fig = px.line(df, x='timestamp', 
-                 y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
-                 labels={'value': 'Hashrate', 'variable': ''},
-                 color_discrete_map={
-                     'pool_hashrate_mhs': '#4cc9f0',
-                     'network_hashrate_ghs': '#f72585'
-                 })
-    
-    # Add block indicators as stars
+    fig = px.line(
+        df, x='timestamp',
+        y=['pool_hashrate_mhs', 'network_hashrate_ghs'],
+        labels={'value': 'Hashrate', 'variable': ''},
+        color_discrete_map={
+            'pool_hashrate_mhs': '#4cc9f0',
+            'network_hashrate_ghs': '#f72585'
+        }
+    )
+
     block_times = df[df['block_found']]['timestamp']
     for block_time in block_times:
         fig.add_annotation(
@@ -168,15 +152,26 @@ if not df.empty:
             ay=-40,
             font=dict(size=20, color="#FFD700")
         )
-    
+
     fig.update_layout(
         hovermode="x unified",
-        plot_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='#202e3c',
+        paper_bgcolor='#202e3c',
+        font=dict(color="white"),
         legend=dict(orientation="h", y=1.1),
-        margin=dict(t=20, b=20)
+        margin=dict(t=20, b=20),
+        xaxis=dict(
+            gridcolor='rgba(255,255,255,0.1)',
+            zeroline=False
+        ),
+        yaxis=dict(
+            gridcolor='rgba(255,255,255,0.1)',
+            zeroline=False
+        )
     )
+
     st.plotly_chart(fig, use_container_width=True, key="hashrate_chart")
-    # Auto-refresh
+
     if st.button("🔄 Manual Refresh"):
         st.cache_data.clear()
         st.rerun()
