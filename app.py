@@ -10,7 +10,7 @@ from datetime import datetime
 
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
-REFRESH_INTERVAL = 2  # seconds
+REFRESH_INTERVAL = 5  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
 GITHUB_OWNER = "B4k469420"
@@ -84,10 +84,10 @@ def format_hashrate(h):
     return f"{h:.2f} H/s"
 
 # Main app
-st.title("⛏️ Live Monero Pool Dashboard")
-st.caption(f"Updated every 10 seconds (data collected/presented with some delay) | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
+st.title("⛏️ Qubic Monero Pool Stats")
 
 # Load data
+@st.cache_data(ttl=5)
 df = load_data()
 
 if not df.empty:
