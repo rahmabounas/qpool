@@ -49,7 +49,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data(ttl=3, show_spinner="Loading latest data...")
+@st.cache_data(ttl=10, show_spinner="Loading latest data...")
 def load_data():
     url = GITHUB_RAW_URL.format(
         owner=GITHUB_OWNER,
