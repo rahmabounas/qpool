@@ -10,7 +10,7 @@ from datetime import datetime
 
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats.csv"
-REFRESH_INTERVAL = 10  # seconds
+REFRESH_INTERVAL = 2  # seconds
 
 # GitHub settings - REPLACE THESE WITH YOUR INFO
 GITHUB_OWNER = "B4k469420"
@@ -60,7 +60,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data(ttl=3, show_spinner="Loading latest data...")
+@st.cache_data(ttl=1, show_spinner="Loading latest data...")
 def load_data():
     url = GITHUB_RAW_URL.format(
         owner=GITHUB_OWNER,
@@ -96,7 +96,7 @@ def format_hashrate(h):
 
 # Main app
 st.title("⛏️ Live Monero Pool Dashboard")
-st.caption(f"Updated every {REFRESH_INTERVAL} seconds (data collected/presented with some delay) | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
+st.caption(f"Updated every 10 seconds (data collected/presented with some delay) | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
 # Auto-refresh
 if st.button("🔄 Manual Refresh"):
     st.cache_data.clear()
