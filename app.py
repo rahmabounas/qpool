@@ -14,7 +14,6 @@ GITHUB_OWNER = "B4k469420"
 GITHUB_REPO = "qpool"
 GITHUB_BRANCH = "main"
 
-
 # Setup page
 st.set_page_config(
     page_title="Qubic Monero Pool Dashboard",
@@ -65,7 +64,7 @@ def load_data():
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         
-        # Calculate blocks
+        # Calculate if a block was found in this interval
         df['block_found'] = df['blocks_found'].diff().fillna(0) > 0
         
         return df
@@ -116,8 +115,8 @@ if not df.empty:
         block_status = "🟢 Found!" if latest['block_found'] else "🔴 Searching"
         st.markdown(f"""
         <div class="metric-card">
-            <div>BLOCKS FOUND</div>
-            <div class="metric-value">{int(latest['cumulative_blocks'])}</div>
+            <div>CURRENT BLOCKS</div>
+            <div class="metric-value">{int(latest['blocks_found'])}</div>
             <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -155,8 +154,6 @@ if not df.empty:
 
 else:
     st.warning("No data available. Waiting for first data points...")
-
-
 
 # JavaScript auto-refresh
 st.components.v1.html(f"""
