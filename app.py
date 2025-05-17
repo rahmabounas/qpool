@@ -164,9 +164,9 @@ if not df.empty:
         margin=dict(t=20, b=20)
     )
     st.plotly_chart(fig, use_container_width=True, key="hashrate_chart")
-# Auto-refresh
-if st.button("🔄 Manual Refresh"):
-    st.cache_data.clear()
-    st.rerun()
+    # Auto-refresh
+    if st.button("🔄 Manual Refresh"):
+        st.cache_data.clear()
+        st.rerun()
 else:
     st.warning("No data available. Waiting for first data points...")
