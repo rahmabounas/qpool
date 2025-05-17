@@ -80,7 +80,7 @@ def format_hashrate(h):
 
 # Main app
 st.title("⛏️ Live Monero Pool Dashboard")
-st.caption(f"Updated every {REFRESH_INTERVAL} seconds | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
+st.caption(f"Updated every {REFRESH_INTERVAL} seconds (data collected/presented with some delay) | Last refresh: {datetime.now().strftime('%H:%M:%S')}")
 # Auto-refresh
 if st.button("🔄 Manual Refresh"):
     st.cache_data.clear()
