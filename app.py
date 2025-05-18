@@ -297,5 +297,20 @@ if not df.empty:
         )
 
     st.plotly_chart(fig, use_container_width=True)
+
+    if st.button("🔄 Manual Refresh"):
+        st.cache_data.clear()
+        st.rerun()
+        
+    # Add a data source note
+    st.markdown(
+    """
+    <div style="margin-top: 1em; font-size: 0.9em; color: gray;">
+        📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a><br>
+        ⏱️ <em>Note:</em> Data is slightly delayed due to the data collection approach.
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
 else:
     st.warning("No data available to display.")
