@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import requests
 import time
 from datetime import datetime
+from datetime import timedelta
 
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats_V2.csv"
@@ -97,6 +98,16 @@ def format_hashrate(h):
 # Load Data
 df = load_data()
 
+# Calculate mean hashrate for the last 6 hours
+if not df.empty:
+    six_hours_ago = df['timestamp'].max() - timedelta(hours=6)
+    df_last_6h = df[df['timestamp'] >= six_hours_ago]
+
+    if not df_last_6h.empty:
+        mean_hashrate_6h = df_last_6h['pool_hashrate'].mean() / 1e6  # Convert to MH/s
+    else:
+        mean_hashrate_6h = 0
+
 # Metrics Cards
 if not df.empty:
     latest = df.iloc[-1]
@@ -119,10 +130,11 @@ if not df.empty:
 
     with cols[2]:
         st.markdown(f"""
+    st.markdown(f"""
         <div class="metric-card">
-            <div>MEAN POOL HASHRATE</div>
-            <div class="metric-value">{mean_hashrate_mhs:.2f} MH/s</div>
-            <div class="delta-value">({len(df)} samples)</div>
+            <div>MEAN HASHRATE (6H)</div>
+            <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
+            <div class="delta-value">Last 6 hours</div>
         </div>
         """, unsafe_allow_html=True)
 
