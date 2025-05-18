@@ -126,7 +126,7 @@ if not df.empty:
         """, unsafe_allow_html=True)
 
     with cols[2]:
-        block_status = "🟢 Found!" if latest['block_found'] else "🔴 Searching"
+        block_status = "🟢 Found!" if latest['block_found'] else "🔴 Working"
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
