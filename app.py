@@ -91,6 +91,13 @@ def format_hashrate(h):
     elif h >= 1e3: return f"{h/1e3:.2f} KH/s"
     return f"{h:.2f} H/s"
 
+def format_timespan(delta):
+    if delta.days > 0:
+        return f"{delta.days}d {delta.seconds//3600}h ago"
+    hours = delta.seconds // 3600
+    minutes = (delta.seconds % 3600) // 60
+    return f"{hours}h {minutes}m ago"
+
 # Load Data
 df = load_data()
 
@@ -112,6 +119,14 @@ if not df.empty:
     # Calculate previous ATH (excluding current value)
     previous_ath = df['pool_hashrate'][:-1].max()
     previous_ath_mhs = previous_ath / 1e6
+    ath_date = df.loc[df['pool_hashrate'] == previous_ath, 'timestamp'].iloc[0].strftime('%Y-%m-%d')
+    
+    # Calculate time since last block
+    if df['block_found'].any():
+        last_block_time = df[df['block_found']]['timestamp'].iloc[-1]
+        time_since_block = format_timespan(latest['timestamp'] - last_block_time)
+    else:
+        time_since_block = "No blocks found yet"
 
     cols = st.columns(4)
     with cols[0]:
@@ -119,7 +134,7 @@ if not df.empty:
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s<br>Δ {delta_pool:+.2f} MH/s</div>
+            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s ({ath_date})<br>{delta_pool:+.2f} MH/s</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -138,6 +153,7 @@ if not df.empty:
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
             <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
+            <div class="time-since-block">Last block: {time_since_block}</div>
             <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
@@ -147,7 +163,7 @@ if not df.empty:
         <div class="metric-card">
             <div>NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">Δ {delta_net:+.2f} GH/s</div>
+            <div class="delta-value">{delta_net:+.2f} GH/s</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -177,6 +193,23 @@ if not df.empty:
         yaxis='y1'
     ))
 
+    # Add stars for blocks found
+    block_times = df[df['block_found']]['timestamp']
+    block_hashes = df[df['block_found']]['pool_hashrate_mhs']
+    fig.add_trace(go.Scatter(
+        x=block_times,
+        y=block_hashes,
+        mode='markers',
+        name='Block Found',
+        marker=dict(
+            symbol='star',
+            size=12,
+            color='gold',
+            line=dict(width=1, color='black')
+        ),
+        hovertemplate='Block found!<extra></extra>'
+    ))
+
     # Layout
     fig.update_layout(
         title='Pool & Network Hashrate Over Time',
@@ -197,6 +230,5 @@ if not df.empty:
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
 else:
     st.warning("No data available to display.")
