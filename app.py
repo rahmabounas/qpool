@@ -5,6 +5,7 @@ import requests
 import time
 from datetime import datetime
 from datetime import timedelta
+from plotly.subplots import make_subplots
 
 # Configuration
 GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats_V2.csv"
@@ -165,67 +166,137 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
+if st.button("🚨 DO NOT CLICK ME! 🚨", key="easter_egg"):
+    st.session_state.show_candlestick = not st.session_state.get('show_candlestick', False)
+
 # Chart Section
 if not df.empty:
-    fig = go.Figure()
-
-    # Pool Hashrate (MH/s)
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['pool_hashrate_mhs'],
-        mode='lines+markers',
-        name='Pool Hashrate (MH/s)',
-        line=dict(color='white', width=2),
-        marker=dict(size=3),
-        yaxis='y1'
-    ))
-
-    # Network Hashrate displayed in MH/s, labeled as GH/s
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['network_hashrate_ghs'],  # Note: value is GH/s, but plotted as-is
-        mode='lines',
-        name='Network Hashrate (GH/s)',
-        line=dict(color='deepskyblue', width=2, dash='dot'),
-        hovertemplate='%{y:.2f} GH/s<extra></extra>',
-        yaxis='y1'
-    ))
-
-    # Add stars for blocks found
-    block_times = df[df['block_found']]['timestamp']
-    block_hashes = df[df['block_found']]['pool_hashrate_mhs']
-    fig.add_trace(go.Scatter(
-        x=block_times,
-        y=block_hashes,
-        mode='markers',
-        name='Block Found',
-        marker=dict(
-            symbol='star',
-            size=12,
-            color='gold',
-            line=dict(width=1, color='black')
-        ),
-        hovertemplate='Block found!<extra></extra>'
-    ))
-
-    # Layout
-    fig.update_layout(
-        title='Pool & Network Hashrate Over Time',
-        xaxis=dict(title='Timestamp'),
-        yaxis=dict(
-            title='Hashrate',
-            tickformat=',.0f',
-        ),
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=1.02,
-            xanchor='right',
-            x=1
-        ),
-        margin=dict(l=40, r=20, t=40, b=40),
-        height=450
-    )
+    if st.session_state.get('show_candlestick', False):
+        # Candlestick Easter Egg Mode
+        st.warning("👀 I told you not to click that! Enjoy the secret candlestick view.")
+        
+        # Resample to 1h intervals
+        df_candle = df.set_index('timestamp').resample('1H').agg({
+            'pool_hashrate_mhs': ['first', 'max', 'min', 'last'],
+            'network_hashrate_ghs': 'mean'
+        })
+        df_candle.columns = ['_'.join(col).strip() for col in df_candle.columns.values]
+        df_candle = df_candle.reset_index()
+        
+        # Create candlestick chart
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        
+        # Candlestick trace
+        fig.add_trace(go.Candlestick(
+            x=df_candle['timestamp'],
+            open=df_candle['pool_hashrate_mhs_first'],
+            high=df_candle['pool_hashrate_mhs_max'],
+            low=df_candle['pool_hashrate_mhs_min'],
+            close=df_candle['pool_hashrate_mhs_last'],
+            name='Pool Hashrate (MH/s)',
+            increasing_line_color='lime',
+            decreasing_line_color='red'
+        ), secondary_y=False)
+        
+        # Network hashrate
+        fig.add_trace(go.Scatter(
+            x=df_candle['timestamp'],
+            y=df_candle['network_hashrate_ghs_mean'],
+            mode='lines',
+            name='Network Hashrate (GH/s)',
+            line=dict(color='deepskyblue', width=2, dash='dot'),
+            hovertemplate='%{y:.2f} GH/s<extra></extra>'
+        ), secondary_y=True)
+        
+        # Add stars for blocks found (need to resample these too)
+        block_hours = df[df['block_found']].set_index('timestamp').resample('1H').last().reset_index()
+        fig.add_trace(go.Scatter(
+            x=block_hours['timestamp'],
+            y=block_hours['pool_hashrate_mhs'],
+            mode='markers',
+            name='Block Found',
+            marker=dict(
+                symbol='star',
+                size=12,
+                color='gold',
+                line=dict(width=1, color='black')
+            ),
+            hovertemplate='Block found!<extra></extra>'
+        ), secondary_y=False)
+        
+        # Layout
+        fig.update_layout(
+            title='SECRET VIEW: Pool Hashrate Candlesticks (1h) & Network Hashrate',
+            xaxis=dict(title='Timestamp'),
+            yaxis=dict(title='Pool Hashrate (MH/s)'),
+            yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+            margin=dict(l=40, r=40, t=40, b=40),
+            height=450
+        )
+        fig.update_xaxes(rangeslider_visible=True)
+        
+    else:
+    
+        fig = go.Figure()
+    
+        # Pool Hashrate (MH/s)
+        fig.add_trace(go.Scatter(
+            x=df['timestamp'],
+            y=df['pool_hashrate_mhs'],
+            mode='lines+markers',
+            name='Pool Hashrate (MH/s)',
+            line=dict(color='white', width=2),
+            marker=dict(size=3),
+            yaxis='y1'
+        ))
+    
+        # Network Hashrate displayed in MH/s, labeled as GH/s
+        fig.add_trace(go.Scatter(
+            x=df['timestamp'],
+            y=df['network_hashrate_ghs'],  # Note: value is GH/s, but plotted as-is
+            mode='lines',
+            name='Network Hashrate (GH/s)',
+            line=dict(color='deepskyblue', width=2, dash='dot'),
+            hovertemplate='%{y:.2f} GH/s<extra></extra>',
+            yaxis='y1'
+        ))
+    
+        # Add stars for blocks found
+        block_times = df[df['block_found']]['timestamp']
+        block_hashes = df[df['block_found']]['pool_hashrate_mhs']
+        fig.add_trace(go.Scatter(
+            x=block_times,
+            y=block_hashes,
+            mode='markers',
+            name='Block Found',
+            marker=dict(
+                symbol='star',
+                size=12,
+                color='gold',
+                line=dict(width=1, color='black')
+            ),
+            hovertemplate='Block found!<extra></extra>'
+        ))
+    
+        # Layout
+        fig.update_layout(
+            title='Pool & Network Hashrate Over Time',
+            xaxis=dict(title='Timestamp'),
+            yaxis=dict(
+                title='Hashrate',
+                tickformat=',.0f',
+            ),
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='right',
+                x=1
+            ),
+            margin=dict(l=40, r=20, t=40, b=40),
+            height=450
+        )
 
     st.plotly_chart(fig, use_container_width=True)
 else:
