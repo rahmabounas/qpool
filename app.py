@@ -117,16 +117,16 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[1]:
+    with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
-            <div>NETWORK HASHRATE</div>
-            <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">Δ {delta_net:+.2f} GH/s</div>
+            <div>MEAN POOL HASHRATE</div>
+            <div class="metric-value">{mean_hashrate_mhs:.2f} MH/s</div>
+            <div class="delta-value">({len(df)} samples)</div>
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[2]:
+    with cols[3]:
         block_status = "🟢 Found!" if latest['block_found'] else "🔴 Working"
         st.markdown(f"""
         <div class="metric-card">
@@ -136,15 +136,15 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[3]:
+    with cols[4]:
         st.markdown(f"""
         <div class="metric-card">
-            <div>MEAN POOL HASHRATE</div>
-            <div class="metric-value">{mean_hashrate_mhs:.2f} MH/s</div>
-            <div class="delta-value">({len(df)} samples)</div>
+            <div>NETWORK HASHRATE</div>
+            <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
+            <div class="delta-value">Δ {delta_net:+.2f} GH/s</div>
         </div>
         """, unsafe_allow_html=True)
-
+        
     # Chart: Pool & Network Hashrate
     fig = go.Figure()
 
