@@ -75,7 +75,7 @@ def load_data():
 
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
-        df['block_found'] = df['blocks_found'].diff().fillna(0) > 0
+        df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
 
         return df
     except Exception as e:
@@ -96,7 +96,7 @@ if not df.empty:
     latest = df.iloc[-1]
     mean_hashrate = df['pool_hashrate'].mean()
     mean_hashrate_mhs = mean_hashrate / 1e6
-    block_count = int(df['blocks_found'].max())
+    block_count = int(df['pool_blocks_found'].max())
     delta_pool = df['pool_hashrate_mhs'].diff().iloc[-1]
     delta_net = df['network_hashrate_ghs'].diff().iloc[-1]
 
@@ -125,7 +125,7 @@ if not df.empty:
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
-            <div class="metric-value">{int(latest['blocks_found'])}</div>
+            <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
             <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
