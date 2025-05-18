@@ -143,7 +143,6 @@ if not df.empty:
         <div class="metric-card">
             <div>MEAN HASHRATE (6H)</div>
             <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
-            <div class="delta-value">Last 6 hours</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -163,7 +162,6 @@ if not df.empty:
         <div class="metric-card">
             <div>NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">{delta_net:+.2f} GH/s</div>
         </div>
         """, unsafe_allow_html=True)
 
