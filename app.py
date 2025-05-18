@@ -95,64 +95,11 @@ if not df.empty:
     mean_hashrate_6h = df_last_6h['pool_hashrate'].mean() / 1e6 if not df_last_6h.empty else 0
 
 # Metrics Cards
-if not df.empty:
-    latest = df.iloc[-1]
-    mean_hashrate = df['pool_hashrate'].mean()
-    mean_hashrate_mhs = mean_hashrate / 1e6
-    block_count = int(df['pool_blocks_found'].max())
-    delta_pool = df['pool_hashrate_mhs'].diff().iloc[-1]
-    delta_net = df['network_hashrate_ghs'].diff().iloc[-1]
-
-    # Calculate previous ATH (excluding current value)
-    previous_ath = df['pool_hashrate'][:-1].max()
-    previous_ath_mhs = previous_ath / 1e6
-
-    cols = st.columns(4)
-    with cols[0]:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>POOL HASHRATE</div>
-            <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s<br>Δ {delta_pool:+.2f} MH/s</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with cols[1]:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>MEAN HASHRATE (6H)</div>
-            <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
-            <div class="delta-value">Last 6 hours</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with cols[2]:
-        block_status = "🟢 Found!" if latest['block_found'] else "🔴 Working"
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>BLOCKS FOUND</div>
-            <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
-            <div class="block-indicator">{block_status}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with cols[3]:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>NETWORK HASHRATE</div>
-            <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">Δ {delta_net:+.2f} GH/s</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-
-    # Chart: Pool & Network Hashrate
-    # Chart Section
+# Chart Section
 if not df.empty:
     fig = go.Figure()
 
-    # Add Pool Hashrate (MH/s)
+    # Pool Hashrate (MH/s)
     fig.add_trace(go.Scatter(
         x=df['timestamp'],
         y=df['pool_hashrate_mhs'],
@@ -163,24 +110,23 @@ if not df.empty:
         yaxis='y1'
     ))
 
-    # Add Network Hashrate (GH/s), scaled down to match MH/s range
+    # Network Hashrate displayed in MH/s, labeled as GH/s
     fig.add_trace(go.Scatter(
         x=df['timestamp'],
-        y=df['network_hashrate_ghs'] * 1000,  # convert to MH/s for visual scaling
+        y=df['network_hashrate_ghs'],  # Note: value is GH/s, but plotted as-is
         mode='lines',
         name='Network Hashrate (GH/s)',
-        line=dict(color='deepskyblue', width=1, dash='dot'),
-        hovertemplate='%{y:.2f} MH/s<br>(GH/s: %{customdata:.2f})<extra></extra>',
-        customdata=df['network_hashrate_ghs'].values.reshape(-1, 1),
+        line=dict(color='deepskyblue', width=2, dash='dot'),
+        hovertemplate='%{y:.2f} GH/s<extra></extra>',
         yaxis='y1'
     ))
 
-    # Chart Layout
+    # Layout
     fig.update_layout(
         title='Pool & Network Hashrate Over Time',
         xaxis=dict(title='Timestamp'),
         yaxis=dict(
-            title='Hashrate (MH/s)',
+            title='Hashrate',
             tickformat=',.0f',
         ),
         legend=dict(
