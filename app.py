@@ -306,7 +306,7 @@ if not df.empty:
     st.markdown(
     """
     <div style="margin-top: 1em; font-size: 0.9em; color: gray;">
-        📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a><br>
+        📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a>).<br>
         ⏱️ <em>Note:</em> Data is slightly delayed due to the data collection approach.
     </div>
     """,
