@@ -130,7 +130,6 @@ if not df.empty:
 
     with cols[1]:
         st.markdown(f"""
-    st.markdown(f"""
         <div class="metric-card">
             <div>MEAN HASHRATE (6H)</div>
             <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
