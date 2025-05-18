@@ -103,13 +103,17 @@ if not df.empty:
     delta_pool = df['pool_hashrate_mhs'].diff().iloc[-1]
     delta_net = df['network_hashrate_ghs'].diff().iloc[-1]
 
+    # Calculate previous ATH (excluding current value)
+    previous_ath = df['pool_hashrate'][:-1].max()
+    previous_ath_mhs = previous_ath / 1e6
+
     cols = st.columns(4)
     with cols[0]:
         st.markdown(f"""
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div class="delta-value">Δ {delta_pool:+.2f} MH/s</div>
+            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s<br>Δ {delta_pool:+.2f} MH/s</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -141,49 +145,56 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
+
+
     # Chart: Pool & Network Hashrate
+    # Chart Section
+if not df.empty:
     fig = go.Figure()
 
+    # Add Pool Hashrate (MH/s)
     fig.add_trace(go.Scatter(
         x=df['timestamp'],
         y=df['pool_hashrate_mhs'],
-        mode='lines',
+        mode='lines+markers',
         name='Pool Hashrate (MH/s)',
-        line=dict(color='#4cc9f0', width=2.5)
+        line=dict(color='limegreen', width=2),
+        marker=dict(size=3),
+        yaxis='y1'
     ))
 
+    # Add Network Hashrate (GH/s), scaled down to match MH/s range
     fig.add_trace(go.Scatter(
         x=df['timestamp'],
-        y=df['network_hashrate_ghs'] * 1000,  # Scale GHS to match the visual range of MH/s
+        y=df['network_hashrate_ghs'] * 1000,  # convert to MH/s for visual scaling
         mode='lines',
-        name='Network Hashrate (MH/s) ×1000',
-        line=dict(color='#f72585', width=2.5, dash='dot')
+        name='Network Hashrate (GH/s)',
+        line=dict(color='deepskyblue', width=1, dash='dot'),
+        hovertemplate='%{y:.2f} MH/s<br>(GH/s: %{customdata:.2f})<extra></extra>',
+        customdata=df['network_hashrate_ghs'].values.reshape(-1, 1),
+        yaxis='y1'
     ))
 
-    # Add block found markers
-    block_df = df[df['block_found']]
-    fig.add_trace(go.Scatter(
-        x=block_df['timestamp'],
-        y=block_df['pool_hashrate_mhs'],
-        mode='markers+text',
-        name='Block Found',
-        marker=dict(size=10, color='gold', symbol='star'),
-        text=["⭐"] * len(block_df),
-        textposition="top center"
-    ))
-
+    # Chart Layout
     fig.update_layout(
-        title="Pool & Network Hashrate Over Time",
-        hovermode="x unified",
-        plot_bgcolor='#202e3c',
-        paper_bgcolor='#202e3c',
-        font=dict(color="white"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(t=40, b=40),
-        xaxis=dict(title="Timestamp", gridcolor='rgba(255,255,255,0.1)'),
-        yaxis=dict(title="Hashrate", gridcolor='rgba(255,255,255,0.1)')
+        title='Pool & Network Hashrate Over Time',
+        xaxis=dict(title='Timestamp'),
+        yaxis=dict(
+            title='Hashrate (MH/s)',
+            tickformat=',.0f',
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(l=40, r=20, t=40, b=40),
+        height=450
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 else:
     st.warning("No data available to display.")
