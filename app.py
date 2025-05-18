@@ -128,7 +128,7 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[2]:
+    with cols[1]:
         st.markdown(f"""
     st.markdown(f"""
         <div class="metric-card">
@@ -138,7 +138,7 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[3]:
+    with cols[2]:
         block_status = "🟢 Found!" if latest['block_found'] else "🔴 Working"
         st.markdown(f"""
         <div class="metric-card">
@@ -148,7 +148,7 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[4]:
+    with cols[3]:
         st.markdown(f"""
         <div class="metric-card">
             <div>NETWORK HASHRATE</div>
