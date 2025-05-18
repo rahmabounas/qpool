@@ -135,7 +135,7 @@ if not df.empty:
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s ({ath_date})<br>{delta_pool:+.2f} MH/s</div>
+            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s ({ath_date})</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -148,13 +148,11 @@ if not df.empty:
         """, unsafe_allow_html=True)
 
     with cols[2]:
-        block_status = "🟢 Found!" if latest['block_found'] else "🔴 Working"
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
             <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
             <div class="time-since-block">Last block: {time_since_block}</div>
-            <div class="block-indicator">{block_status}</div>
         </div>
         """, unsafe_allow_html=True)
 
