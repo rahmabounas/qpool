@@ -8,7 +8,7 @@ from datetime import timedelta
 from plotly.subplots import make_subplots
 
 # Configuration
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/B4k469420/qpool/refs/heads/main/data/pool_stats_V2.csv"
+GITHUB_RAW_URL = "http://66.179.92.83/data/pool_stats_V2.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # GitHub settings
