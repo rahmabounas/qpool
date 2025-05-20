@@ -99,6 +99,53 @@ def format_timespan(delta):
     minutes = (delta.seconds % 3600) // 60
     return f"{hours}h {minutes}m ago"
 
+def downsample_data(df, interval='10T'):
+    """Downsample data while preserving important points (ATH, blocks found)"""
+    # Identify important points to keep
+    ath_idx = df['pool_hashrate'].idxmax()
+    block_indices = df[df['block_found']].index
+    
+    # Create downsampled dataframe
+    df_downsampled = df.resample(interval, on='timestamp').agg({
+        'pool_hashrate': 'mean',
+        'pool_hashrate_mhs': 'mean',
+        'network_hashrate': 'mean',
+        'network_hashrate_ghs': 'mean',
+        'pool_blocks_found': 'last',
+        'block_found': 'any'
+    }).reset_index()
+    
+    # Add ATH point if not already in the downsampled data
+    ath_timestamp = df.loc[ath_idx, 'timestamp']
+    if not any(df_downsampled['timestamp'].between(
+        ath_timestamp - pd.Timedelta(interval), 
+        ath_timestamp + pd.Timedelta(interval)
+    ):
+        df_downsampled = pd.concat([
+            df_downsampled,
+            df.loc[[ath_idx]]
+        ).sort_values('timestamp')
+    
+    # Add block points if not already in the downsampled data
+    for idx in block_indices:
+        block_time = df.loc[idx, 'timestamp']
+        if not any(df_downsampled['timestamp'].between(
+            block_time - pd.Timedelta(interval), 
+            block_time + pd.Timedelta(interval)
+        ):
+            df_downsampled = pd.concat([
+                df_downsampled,
+                df.loc[[idx]]
+            ).sort_values('timestamp')
+    
+    # Ensure we don't have duplicate timestamps
+    df_downsampled = df_downsampled.drop_duplicates('timestamp')
+    
+    # Recalculate block_found for the downsampled data
+    df_downsampled['block_found'] = df_downsampled['pool_blocks_found'].diff().fillna(0) > 0
+    
+    return df_downsampled
+
 # Load Data
 df = load_data()
 
@@ -169,48 +216,43 @@ if st.button("🚨 DO NOT CLICK ME! 🚨", key="easter_egg"):
 
 # Chart Section
 if not df.empty:
+    # Downsample the data for better performance
+    df_chart = downsample_data(df)
+    
     if st.session_state.get('show_candlestick', False):
         # Candlestick Easter Egg Mode
         st.warning("👀 I told you not to click that! Enjoy the secret candlestick view.")
         
-        # Resample to 1h intervals
-        df_candle = df.set_index('timestamp').resample('1H').agg({
-            'pool_hashrate_mhs': ['first', 'max', 'min', 'last'],
-            'network_hashrate_ghs': 'mean'
-        })
-        df_candle.columns = ['_'.join(col).strip() for col in df_candle.columns.values]
-        df_candle = df_candle.reset_index()
-        
         # Create candlestick chart
         fig = make_subplots(specs=[[{"secondary_y": True}]])
         
-        # Candlestick trace
-        fig.add_trace(go.Candlestick(
-            x=df_candle['timestamp'],
-            open=df_candle['pool_hashrate_mhs_first'],
-            high=df_candle['pool_hashrate_mhs_max'],
-            low=df_candle['pool_hashrate_mhs_min'],
-            close=df_candle['pool_hashrate_mhs_last'],
+        # Candlestick trace (using downsampled data)
+        fig.add_trace(go.Scatter(
+            x=df_chart['timestamp'],
+            y=df_chart['pool_hashrate_mhs'],
+            mode='lines',
             name='Pool Hashrate (MH/s)',
-            increasing_line_color='lime',
-            decreasing_line_color='red'
+            line=dict(color='white', width=2),
+            yaxis='y1'
         ), secondary_y=False)
         
         # Network hashrate
         fig.add_trace(go.Scatter(
-            x=df_candle['timestamp'],
-            y=df_candle['network_hashrate_ghs_mean'],
+            x=df_chart['timestamp'],
+            y=df_chart['network_hashrate_ghs'],
             mode='lines',
             name='Network Hashrate (GH/s)',
             line=dict(color='deepskyblue', width=2, dash='dot'),
-            hovertemplate='%{y:.2f} GH/s<extra></extra>'
+            hovertemplate='%{y:.2f} GH/s<extra></extra>',
+            yaxis='y1'
         ), secondary_y=True)
         
-        # Add stars for blocks found (need to resample these too)
-        block_hours = df[df['block_found']].set_index('timestamp').resample('1H').last().reset_index()
+        # Add stars for blocks found
+        block_times = df_chart[df_chart['block_found']]['timestamp']
+        block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
         fig.add_trace(go.Scatter(
-            x=block_hours['timestamp'],
-            y=block_hours['pool_hashrate_mhs'],
+            x=block_times,
+            y=block_hashes,
             mode='markers',
             name='Block Found',
             marker=dict(
@@ -224,7 +266,7 @@ if not df.empty:
         
         # Layout
         fig.update_layout(
-            title='SECRET VIEW: Pool Hashrate Candlesticks (1h) & Network Hashrate',
+            title='SECRET VIEW: Pool Hashrate (Downsampled) & Network Hashrate',
             xaxis=dict(title='Timestamp'),
             yaxis=dict(title='Pool Hashrate (MH/s)'),
             yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
@@ -235,24 +277,22 @@ if not df.empty:
         fig.update_xaxes(rangeslider_visible=True)
         
     else:
-    
         fig = go.Figure()
     
-        # Pool Hashrate (MH/s)
+        # Pool Hashrate (MH/s) - using downsampled data
         fig.add_trace(go.Scatter(
-            x=df['timestamp'],
-            y=df['pool_hashrate_mhs'],
-            mode='lines+markers',
+            x=df_chart['timestamp'],
+            y=df_chart['pool_hashrate_mhs'],
+            mode='lines',
             name='Pool Hashrate (MH/s)',
             line=dict(color='white', width=2),
-            marker=dict(size=3),
             yaxis='y1'
         ))
     
         # Network Hashrate displayed in MH/s, labeled as GH/s
         fig.add_trace(go.Scatter(
-            x=df['timestamp'],
-            y=df['network_hashrate_ghs'],  # Note: value is GH/s, but plotted as-is
+            x=df_chart['timestamp'],
+            y=df_chart['network_hashrate_ghs'],
             mode='lines',
             name='Network Hashrate (GH/s)',
             line=dict(color='deepskyblue', width=2, dash='dot'),
@@ -261,8 +301,8 @@ if not df.empty:
         ))
     
         # Add stars for blocks found
-        block_times = df[df['block_found']]['timestamp']
-        block_hashes = df[df['block_found']]['pool_hashrate_mhs']
+        block_times = df_chart[df_chart['block_found']]['timestamp']
+        block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
         fig.add_trace(go.Scatter(
             x=block_times,
             y=block_hashes,
@@ -279,7 +319,7 @@ if not df.empty:
     
         # Layout
         fig.update_layout(
-            title='Pool & Network Hashrate Over Time',
+            title='Pool & Network Hashrate Over Time (Downsampled to 10-minute intervals)',
             xaxis=dict(title='Timestamp'),
             yaxis=dict(
                 title='Hashrate',
