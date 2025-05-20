@@ -123,9 +123,9 @@ def downsample_data(df, interval='5T'):
 
     # Add ATH point if it's not already in downsampled range
     ath_timestamp = df.loc[ath_idx, 'timestamp']
-    if not ((df_downsampled['timestamp'] >= ath_timestamp - pd.Timedelta(interval)) & 
-            (df_downsampled['timestamp'] <= ath_timestamp + pd.Timedelta(interval))).any():
-        df_downsampled = pd.concat([df_downsampled, df.loc[[ath_idx]]], ignore_index=True)
+    # Always add the exact row where a block was found
+    df_downsampled = pd.concat([df_downsampled, df.loc[[idx]]], ignore_index=True)
+
 
     # Add all block points ("stars") if not already in the downsampled set
     for idx in block_indices:
@@ -135,7 +135,7 @@ def downsample_data(df, interval='5T'):
             df_downsampled = pd.concat([df_downsampled, df.loc[[idx]]], ignore_index=True)
 
     # Final clean-up
-    df_downsampled = df_downsampled.sort_values('timestamp').drop_duplicates('timestamp')
+    df_downsampled = df_downsampled.sort_values('timestamp').drop_duplicates('timestamp', keep='last')
     df_downsampled['block_found'] = df_downsampled['pool_blocks_found'].diff().fillna(0) > 0
 
     return df_downsampled
