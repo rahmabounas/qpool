@@ -136,7 +136,7 @@ def downsample_data(df, interval='10T'):
             df_downsampled = pd.concat([
                 df_downsampled,
                 df.loc[[idx]]
-            ).sort_values('timestamp')
+            ]).sort_values('timestamp')
     
     # Ensure we don't have duplicate timestamps
     df_downsampled = df_downsampled.drop_duplicates('timestamp')
