@@ -120,7 +120,7 @@ def downsample_data(df, interval='10T'):
     if not any(df_downsampled['timestamp'].between(
         ath_timestamp - pd.Timedelta(interval), 
         ath_timestamp + pd.Timedelta(interval)
-    ):
+    )):
         df_downsampled = pd.concat([
             df_downsampled,
             df.loc[[ath_idx]]
@@ -132,7 +132,8 @@ def downsample_data(df, interval='10T'):
         if not any(df_downsampled['timestamp'].between(
             block_time - pd.Timedelta(interval), 
             block_time + pd.Timedelta(interval)
-        ):
+        )):
+
             df_downsampled = pd.concat([
                 df_downsampled,
                 df.loc[[idx]]
