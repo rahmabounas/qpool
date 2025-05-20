@@ -206,9 +206,6 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-if st.button("🚨 DO NOT CLICK ME! 🚨", key="easter_egg"):
-    st.session_state.show_candlestick = not st.session_state.get('show_candlestick', False)
-
 # Chart Section
 if not df.empty:
     # Downsample the data for better performance
