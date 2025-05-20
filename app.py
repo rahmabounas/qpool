@@ -99,7 +99,7 @@ def format_timespan(delta):
     minutes = (delta.seconds % 3600) // 60
     return f"{hours}h {minutes}m ago"
 
-def downsample_data(df, interval='10T'):
+def downsample_data(df, interval='5T'):
     """Downsample data while preserving important points (ATH, blocks found)."""
     if df.empty:
         return df
