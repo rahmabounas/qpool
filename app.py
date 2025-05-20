@@ -100,12 +100,15 @@ def format_timespan(delta):
     return f"{hours}h {minutes}m ago"
 
 def downsample_data(df, interval='10T'):
-    """Downsample data while preserving important points (ATH, blocks found)"""
+    """Downsample data while preserving important points (ATH, blocks found)."""
+    if df.empty:
+        return df
+
     # Identify important points to keep
     ath_idx = df['pool_hashrate'].idxmax()
     block_indices = df[df['block_found']].index
-    
-    # Create downsampled dataframe
+
+    # Downsample main data
     df_downsampled = df.resample(interval, on='timestamp').agg({
         'pool_hashrate': 'mean',
         'pool_hashrate_mhs': 'mean',
@@ -114,38 +117,29 @@ def downsample_data(df, interval='10T'):
         'pool_blocks_found': 'last',
         'block_found': 'any'
     }).reset_index()
-    
-    # Add ATH point if not already in the downsampled data
+
+    # Ensure timestamp is datetime
+    df_downsampled['timestamp'] = pd.to_datetime(df_downsampled['timestamp'])
+
+    # Add ATH point if it's not already in downsampled range
     ath_timestamp = df.loc[ath_idx, 'timestamp']
-    if not any(df_downsampled['timestamp'].between(
-        ath_timestamp - pd.Timedelta(interval), 
-        ath_timestamp + pd.Timedelta(interval)
-    )):
-        df_downsampled = pd.concat([
-            df_downsampled,
-            df.loc[[ath_idx]]
-        ]).sort_values('timestamp')
-    
-    # Add block points if not already in the downsampled data
+    if not ((df_downsampled['timestamp'] >= ath_timestamp - pd.Timedelta(interval)) & 
+            (df_downsampled['timestamp'] <= ath_timestamp + pd.Timedelta(interval))).any():
+        df_downsampled = pd.concat([df_downsampled, df.loc[[ath_idx]]], ignore_index=True)
+
+    # Add all block points ("stars") if not already in the downsampled set
     for idx in block_indices:
         block_time = df.loc[idx, 'timestamp']
-        if not any(df_downsampled['timestamp'].between(
-            block_time - pd.Timedelta(interval), 
-            block_time + pd.Timedelta(interval)
-        )):
+        if not ((df_downsampled['timestamp'] >= block_time - pd.Timedelta(interval)) & 
+                (df_downsampled['timestamp'] <= block_time + pd.Timedelta(interval))).any():
+            df_downsampled = pd.concat([df_downsampled, df.loc[[idx]]], ignore_index=True)
 
-            df_downsampled = pd.concat([
-                df_downsampled,
-                df.loc[[idx]]
-            ]).sort_values('timestamp')
-    
-    # Ensure we don't have duplicate timestamps
-    df_downsampled = df_downsampled.drop_duplicates('timestamp')
-    
-    # Recalculate block_found for the downsampled data
+    # Final clean-up
+    df_downsampled = df_downsampled.sort_values('timestamp').drop_duplicates('timestamp')
     df_downsampled['block_found'] = df_downsampled['pool_blocks_found'].diff().fillna(0) > 0
-    
+
     return df_downsampled
+
 
 # Load Data
 df = load_data()
