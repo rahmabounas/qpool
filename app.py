@@ -124,7 +124,7 @@ def downsample_data(df, interval='10T'):
         df_downsampled = pd.concat([
             df_downsampled,
             df.loc[[ath_idx]]
-        ).sort_values('timestamp')
+        ]).sort_values('timestamp')
     
     # Add block points if not already in the downsampled data
     for idx in block_indices:
