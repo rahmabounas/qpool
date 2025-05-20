@@ -314,7 +314,7 @@ if not df.empty:
     
         # Layout
         fig.update_layout(
-            title='Pool & Network Hashrate Over Time (Downsampled to 10-minute intervals)',
+            title='Pool & Network Hashrate Over Time (Downsampled to 5-minute intervals)',
             xaxis=dict(title='Timestamp'),
             yaxis=dict(
                 title='Hashrate',
