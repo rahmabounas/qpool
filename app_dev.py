@@ -109,7 +109,6 @@ def downsample(df, interval='5T'):
 
 # Load
 df = load_data()
-prices_df, current_prices = fetch_prices()
 
 # Metrics
 if not df.empty:
