@@ -398,7 +398,7 @@ with col1:
 with col2:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.markdown("### Price Charts")
-        colsPrice = st.columns(2)
+    colsPrice = st.columns(2)
     with colsPrice[0]:
         price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
         st.markdown(f"""
