@@ -224,7 +224,15 @@ if not df.empty:
     else:
         time_since_block = "No blocks found yet"
 
-    cols = st.columns(6)
+
+# Create two columns for charts
+col1, col2 = st.columns([2, 1])
+
+# Pool Stats Chart in first column
+with col1:
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Pool Statistics")
+    cols = st.columns(4)
     with cols[0]:
         st.markdown(f"""
         <div class="metric-card">
@@ -258,45 +266,10 @@ if not df.empty:
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
         </div>
         """, unsafe_allow_html=True)
-        
-    with cols[4]:
-        price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>XMR PRICE</div>
-            <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
-            <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with cols[5]:
-        price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>QUBIC PRICE</div>
-            <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
-            <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-# Create two columns for charts
-col1, col2 = st.columns([2, 1])
-
-# Pool Stats Chart in first column
-# Pool Stats Chart in first column
-with col1:
-    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-    st.markdown("### Pool Statistics")
     
     if not df.empty:
         # Downsample the data for better performance
         df_chart = downsample_data(df)
-        
-        # Calculate mean hashrate for the entire dataset
-        df_chart['mean_hashrate_mhs'] = df_chart['pool_hashrate_mhs'].expanding().mean()
-        
-        # Calculate ATH hashrate
-        df_chart['ath_hashrate_mhs'] = df_chart['pool_hashrate_mhs'].cummax()
         
         if st.session_state.get('show_candlestick', False):
             # Candlestick Easter Egg Mode
@@ -305,23 +278,13 @@ with col1:
             # Create candlestick chart
             fig = make_subplots(specs=[[{"secondary_y": True}]])
             
-            # Mean hashrate trace
+            # Candlestick trace (using downsampled data)
             fig.add_trace(go.Scatter(
                 x=df_chart['timestamp'],
-                y=df_chart['mean_hashrate_mhs'],
+                y=df_chart['pool_hashrate_mhs'],
                 mode='lines',
-                name='Mean Hashrate (MH/s)',
-                line=dict(color='cyan', width=2),
-                yaxis='y1'
-            ), secondary_y=False)
-            
-            # ATH hashrate trace
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['ath_hashrate_mhs'],
-                mode='lines',
-                name='ATH Hashrate (MH/s)',
-                line=dict(color='gold', width=2, dash='dot'),
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='white', width=2),
                 yaxis='y1'
             ), secondary_y=False)
             
@@ -338,7 +301,7 @@ with col1:
             
             # Add stars for blocks found
             block_times = df_chart[df_chart['block_found']]['timestamp']
-            block_hashes = df_chart[df_chart['block_found']]['mean_hashrate_mhs']
+            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
             fig.add_trace(go.Scatter(
                 x=block_times,
                 y=block_hashes,
@@ -347,7 +310,7 @@ with col1:
                 marker=dict(
                     symbol='star',
                     size=12,
-                    color='red',
+                    color='gold',
                     line=dict(width=1, color='black')
                 ),
                 hovertemplate='Block found!<extra></extra>'
@@ -355,7 +318,7 @@ with col1:
             
             # Layout
             fig.update_layout(
-                title='SECRET VIEW: Hashrate Statistics (Downsampled)',
+                title='SECRET VIEW: Pool Hashrate (Downsampled) & Network Hashrate',
                 xaxis=dict(title='Timestamp'),
                 yaxis=dict(title='Pool Hashrate (MH/s)'),
                 yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
@@ -368,23 +331,13 @@ with col1:
         else:
             fig = go.Figure()
         
-            # Mean Hashrate (MH/s) - using downsampled data
+            # Pool Hashrate (MH/s) - using downsampled data
             fig.add_trace(go.Scatter(
                 x=df_chart['timestamp'],
-                y=df_chart['mean_hashrate_mhs'],
+                y=df_chart['pool_hashrate_mhs'],
                 mode='lines',
-                name='Mean Hashrate (MH/s)',
-                line=dict(color='cyan', width=2),
-                yaxis='y1'
-            ))
-        
-            # ATH Hashrate (MH/s)
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['ath_hashrate_mhs'],
-                mode='lines',
-                name='ATH Hashrate (MH/s)',
-                line=dict(color='gold', width=2, dash='dot'),
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='white', width=2),
                 yaxis='y1'
             ))
         
@@ -401,7 +354,7 @@ with col1:
         
             # Add stars for blocks found
             block_times = df_chart[df_chart['block_found']]['timestamp']
-            block_hashes = df_chart[df_chart['block_found']]['mean_hashrate_mhs']
+            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
             fig.add_trace(go.Scatter(
                 x=block_times,
                 y=block_hashes,
@@ -410,7 +363,7 @@ with col1:
                 marker=dict(
                     symbol='star',
                     size=12,
-                    color='red',
+                    color='gold',
                     line=dict(width=1, color='black')
                 ),
                 hovertemplate='Block found!<extra></extra>'
@@ -418,7 +371,7 @@ with col1:
 
             # Layout
             fig.update_layout(
-                title='Hashrate Statistics Over Time',
+                title='Pool & Network Hashrate Over Time',
                 xaxis=dict(title='Timestamp'),
                 yaxis=dict(
                     title='Hashrate',
@@ -438,6 +391,114 @@ with col1:
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("No pool data available to display.")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Price Chart in second column
+with col2:
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Price Charts")
+        colsPrice = st.columns(2)
+    with colsPrice[0]:
+        price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div>XMR PRICE</div>
+            <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
+            <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with colsPrice[1]:
+        price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
+        st.markdown(f"""
+        <div class="metric-card">
+            <div>QUBIC PRICE</div>
+            <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
+            <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    if not price_df.empty and current_prices:
+        # Create price chart
+        fig_prices = go.Figure()
+        
+        # Add XMR price
+        xmr_df = price_df[price_df['symbol'] == 'XMR']
+        fig_prices.add_trace(go.Scatter(
+            x=xmr_df['timestamp'],
+            y=xmr_df['close'],
+            mode='lines',
+            name='XMR Price (USD)',
+            line=dict(color='limegreen', width=2),
+            yaxis='y1'
+        ))
+        
+        # Add QUBIC price (on secondary axis)
+        qubic_df = price_df[price_df['symbol'] == 'QUBIC']
+        fig_prices.add_trace(go.Scatter(
+            x=qubic_df['timestamp'],
+            y=qubic_df['close'],
+            mode='lines',
+            name='QUBIC Price (USD)',
+            line=dict(color='magenta', width=2),
+            yaxis='y2'
+        ))
+        
+        # Layout with dual y-axes
+        fig_prices.update_layout(
+            title='XMR & QUBIC Prices (24h)',
+            xaxis=dict(title='Timestamp'),
+            yaxis=dict(
+                title='XMR Price (USD)',
+                tickformat='$.2f',
+                side='left',
+                showgrid=False
+            ),
+            yaxis2=dict(
+                title='QUBIC Price (USD)',
+                tickformat='$.6f',
+                overlaying='y',
+                side='right',
+                showgrid=False
+            ),
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=1.02,
+                xanchor='right',
+                x=1
+            ),
+            margin=dict(l=40, r=40, t=40, b=40),
+            height=450
+        )
+        
+        st.plotly_chart(fig_prices, use_container_width=True)
+        
+        # Add current price information
+        st.markdown("#### Current Prices")
+        price_cols = st.columns(2)
+        with price_cols[0]:
+            price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>XMR PRICE</div>
+                <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
+                <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with price_cols[1]:
+            price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>QUBIC PRICE</div>
+                <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
+                <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.warning("No price data available to display.")
     
     st.markdown('</div>', unsafe_allow_html=True)
 
