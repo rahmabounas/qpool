@@ -67,37 +67,16 @@ def load_data():
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
+        df['close'] = df['close'].astype(float)
+        df['qubic_usdt'] = df['qubic_usdt'].astype(float)
         return df
     except Exception as e:
         st.error(f"Data loading error: {str(e)}")
         return pd.DataFrame()
 
-@st.cache_data(ttl=300)
-def fetch_prices():
-    try:
-        xmr_ticker = EXCHANGE.fetch_ticker('XMR/USDT')
-        qubic_ticker = EXCHANGE.fetch_ticker('QUBIC/USDT')
+# Remove fetch_prices() call since not used now
+df = load_data()
 
-        since = EXCHANGE.milliseconds() - 86400 * 1000
-        xmr_ohlcv = EXCHANGE.fetch_ohlcv('XMR/USDT', '1h', since=since)
-        qubic_ohlcv = EXCHANGE.fetch_ohlcv('QUBIC/USDT', '1h', since=since)
-
-        def build_df(ohlcv, symbol):
-            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            df['symbol'] = symbol
-            return df
-
-        return (pd.concat([build_df(xmr_ohlcv, 'XMR'), build_df(qubic_ohlcv, 'QUBIC')]),
-                {
-                    'XMR': xmr_ticker['last'],
-                    'QUBIC': qubic_ticker['last'],
-                    'XMR_change': xmr_ticker['percentage'],
-                    'QUBIC_change': qubic_ticker['percentage']
-                })
-    except Exception as e:
-        st.error(f"Price fetch error: {str(e)}")
-        return pd.DataFrame(), {}
 
 def format_hashrate(h):
     if h >= 1e9: return f"{h/1e9:.2f} GH/s"
@@ -182,36 +161,30 @@ with col1:
 
 with col2:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-    st.markdown("### Price Charts")
-    p1, p2 = st.columns(2)
-    for coin, label, col in zip(['XMR', 'QUBIC'], ['XMR PRICE', 'QUBIC PRICE'], [p1, p2]):
-        change = current_prices.get(f'{coin}_change', 0)
-        cls = 'price-positive' if change >= 0 else 'price-negative'
-        val = current_prices.get(coin, 0)
-        fmt = '.2f' if coin == 'XMR' else '.6f'
-        with col:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div>{label}</div>
-                <div class="metric-value">${val:{fmt}}</div>
-                <div class="delta-value {cls}">{change:.2f}%</div>
-            </div>
-            """, unsafe_allow_html=True)
+    st.markdown("### Price Chart")
 
-    if not prices_df.empty:
+    if not df.empty:
         fig = go.Figure()
-        for coin, color, axis in [('XMR', 'limegreen', 'y1'), ('QUBIC', 'magenta', 'y2')]:
-            df_coin = prices_df[prices_df['symbol'] == coin]
-            fig.add_trace(go.Scatter(x=df_coin['timestamp'], y=df_coin['close'], name=f'{coin} Price', line=dict(color=color), yaxis=axis))
-
+        fig.add_trace(go.Scatter(
+            x=df['timestamp'], y=df['close'], 
+            name='XMR Close Price (USD)', 
+            line=dict(color='limegreen')
+        ))
+        fig.add_trace(go.Scatter(
+            x=df['timestamp'], y=df['qubic_usdt'], 
+            name='QUBIC Price (USD)', 
+            line=dict(color='magenta')
+        ))
         fig.update_layout(
-            title='XMR & QUBIC Prices (24h)',
+            title='XMR & QUBIC Prices Over Time',
             xaxis_title='Timestamp',
-            yaxis=dict(title='XMR Price (USD)', side='left'),
-            yaxis2=dict(title='QUBIC Price (USD)', overlaying='y', side='right'),
-            height=450
+            yaxis_title='Price (USD)',
+            height=450,
+            legend=dict(x=0, y=1)
         )
         st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No price data available.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 if st.button("🔄 Manual Refresh"):
