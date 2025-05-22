@@ -232,7 +232,7 @@ col1, col2 = st.columns([3, 2])
 with col1:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.markdown("### Pool Statistics")
-    cols = st.columns(3)
+    cols = st.columns(2)
     with cols[0]:
         st.markdown(f"""
         <div class="metric-card">
@@ -250,16 +250,11 @@ with col1:
             <div>BLOCKS FOUND</div>
             <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
             <div class="time-since-block">Last block: {time_since_block}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with cols[2]:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>NETWORK HASHRATE</div>
+            <div style="margin-top: 10px;">NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
         </div>
         """, unsafe_allow_html=True)
+
     
     if not df.empty:
         # Downsample the data for better performance
@@ -451,7 +446,7 @@ with col2:
             ),
             yaxis2=dict(
                 title='QUBIC Price (USD)',
-                tickformat='$.6f',
+                tickformat='$.7f',
                 overlaying='y',
                 side='right',
                 showgrid=False
