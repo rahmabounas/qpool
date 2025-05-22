@@ -232,25 +232,19 @@ col1, col2 = st.columns([3, 2])
 with col1:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.markdown("### Pool Statistics")
-    cols = st.columns(4)
+    cols = st.columns(3)
     with cols[0]:
         st.markdown(f"""
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+            <div style="margin-top: 10px;">MEAN (6H)</div>
+            <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
             <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s ({ath_date})</div>
         </div>
         """, unsafe_allow_html=True)
 
     with cols[1]:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>MEAN HASHRATE (6H)</div>
-            <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
@@ -259,7 +253,7 @@ with col1:
         </div>
         """, unsafe_allow_html=True)
 
-    with cols[3]:
+    with cols[2]:
         st.markdown(f"""
         <div class="metric-card">
             <div>NETWORK HASHRATE</div>
