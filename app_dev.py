@@ -78,6 +78,13 @@ st.markdown("""
     .price-negative {
         color: #f87171;
     }
+    
+    .chart-container {
+        background: rgba(32, 46, 60, 0.7);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -272,156 +279,188 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
 
-# Chart Section
-if not df.empty:
-    # Downsample the data for better performance
-    df_chart = downsample_data(df)
+# Create two columns for charts
+col1, col2 = st.columns([2, 1])
+
+# Pool Stats Chart in first column
+with col1:
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Pool Statistics")
     
-    if st.session_state.get('show_candlestick', False):
-        # Candlestick Easter Egg Mode
-        st.warning("👀 I told you not to click that! Enjoy the secret candlestick view.")
+    if not df.empty:
+        # Downsample the data for better performance
+        df_chart = downsample_data(df)
         
-        # Create candlestick chart
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        
-        # Candlestick trace (using downsampled data)
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['pool_hashrate_mhs'],
-            mode='lines',
-            name='Pool Hashrate (MH/s)',
-            line=dict(color='white', width=2),
-            yaxis='y1'
-        ), secondary_y=False)
-        
-        # Network hashrate
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['network_hashrate_ghs'],
-            mode='lines',
-            name='Network Hashrate (GH/s)',
-            line=dict(color='deepskyblue', width=2, dash='dot'),
-            hovertemplate='%{y:.2f} GH/s<extra></extra>',
-            yaxis='y1'
-        ), secondary_y=True)
-        
-        # Add stars for blocks found
-        block_times = df_chart[df_chart['block_found']]['timestamp']
-        block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
-        fig.add_trace(go.Scatter(
-            x=block_times,
-            y=block_hashes,
-            mode='markers',
-            name='Block Found',
-            marker=dict(
-                symbol='star',
-                size=12,
-                color='gold',
-                line=dict(width=1, color='black')
-            ),
-            hovertemplate='Block found!<extra></extra>'
-        ), secondary_y=False)
-        
-        # Layout
-        fig.update_layout(
-            title='SECRET VIEW: Pool Hashrate (Downsampled) & Network Hashrate',
-            xaxis=dict(title='Timestamp'),
-            yaxis=dict(title='Pool Hashrate (MH/s)'),
-            yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
-            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-            margin=dict(l=40, r=40, t=40, b=40),
-            height=450
-        )
-        fig.update_xaxes(rangeslider_visible=True)
-        
-    else:
-        fig = go.Figure()
-    
-        # Pool Hashrate (MH/s) - using downsampled data
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['pool_hashrate_mhs'],
-            mode='lines',
-            name='Pool Hashrate (MH/s)',
-            line=dict(color='white', width=2),
-            yaxis='y1'
-        ))
-    
-        # Network Hashrate displayed in MH/s, labeled as GH/s
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['network_hashrate_ghs'],
-            mode='lines',
-            name='Network Hashrate (GH/s)',
-            line=dict(color='deepskyblue', width=2, dash='dot'),
-            hovertemplate='%{y:.2f} GH/s<extra></extra>',
-            yaxis='y1'
-        ))
-    
-        # Add stars for blocks found
-        block_times = df_chart[df_chart['block_found']]['timestamp']
-        block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
-        fig.add_trace(go.Scatter(
-            x=block_times,
-            y=block_hashes,
-            mode='markers',
-            name='Block Found',
-            marker=dict(
-                symbol='star',
-                size=12,
-                color='gold',
-                line=dict(width=1, color='black')
-            ),
-            hovertemplate='Block found!<extra></extra>'
-        ))
-        
-        # Add price data if available
-        if not price_df.empty and current_prices:
-            # Add XMR price (scaled down to match hashrate scale)
-            xmr_scaling_factor = latest['pool_hashrate_mhs'] / current_prices.get('XMR', 1)
-            xmr_df = price_df[price_df['symbol'] == 'XMR']
-            fig.add_trace(go.Scatter(
-                x=xmr_df['timestamp'],
-                y=xmr_df['close'] * xmr_scaling_factor,
-                mode='lines',
-                name='XMR Price (scaled)',
-                line=dict(color='limegreen', width=1.5),
-                yaxis='y1',
-                hovertemplate='XMR: $%{y:.2f}<extra></extra>'
-            ))
+        if st.session_state.get('show_candlestick', False):
+            # Candlestick Easter Egg Mode
+            st.warning("👀 I told you not to click that! Enjoy the secret candlestick view.")
             
-            # Add QUBIC price (scaled up to match hashrate scale)
-            qubic_scaling_factor = latest['pool_hashrate_mhs'] / current_prices.get('QUBIC', 1e-6)
-            qubic_df = price_df[price_df['symbol'] == 'QUBIC']
-            fig.add_trace(go.Scatter(
-                x=qubic_df['timestamp'],
-                y=qubic_df['close'] * qubic_scaling_factor,
-                mode='lines',
-                name='QUBIC Price (scaled)',
-                line=dict(color='magenta', width=1.5),
-                yaxis='y1',
-                hovertemplate='QUBIC: $%{y:.6f}<extra></extra>'
-            ))
+            # Create candlestick chart
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
             
-            # Add a secondary y-axis for the actual prices
+            # Candlestick trace (using downsampled data)
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['pool_hashrate_mhs'],
+                mode='lines',
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='white', width=2),
+                yaxis='y1'
+            ), secondary_y=False)
+            
+            # Network hashrate
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['network_hashrate_ghs'],
+                mode='lines',
+                name='Network Hashrate (GH/s)',
+                line=dict(color='deepskyblue', width=2, dash='dot'),
+                hovertemplate='%{y:.2f} GH/s<extra></extra>',
+                yaxis='y1'
+            ), secondary_y=True)
+            
+            # Add stars for blocks found
+            block_times = df_chart[df_chart['block_found']]['timestamp']
+            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
+            fig.add_trace(go.Scatter(
+                x=block_times,
+                y=block_hashes,
+                mode='markers',
+                name='Block Found',
+                marker=dict(
+                    symbol='star',
+                    size=12,
+                    color='gold',
+                    line=dict(width=1, color='black')
+                ),
+                hovertemplate='Block found!<extra></extra>'
+            ), secondary_y=False)
+            
+            # Layout
             fig.update_layout(
-                yaxis2=dict(
-                    title='Price (USD)',
-                    overlaying='y',
-                    side='right',
-                    showgrid=False,
-                    type='log',
-                    range=[np.log10(qubic_df['close'].min() * 0.9), np.log10(xmr_df['close'].max() * 1.1)]
-                )
+                title='SECRET VIEW: Pool Hashrate (Downsampled) & Network Hashrate',
+                xaxis=dict(title='Timestamp'),
+                yaxis=dict(title='Pool Hashrate (MH/s)'),
+                yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
+                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+                margin=dict(l=40, r=40, t=40, b=40),
+                height=450
             )
+            fig.update_xaxes(rangeslider_visible=True)
+            
+        else:
+            fig = go.Figure()
+        
+            # Pool Hashrate (MH/s) - using downsampled data
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['pool_hashrate_mhs'],
+                mode='lines',
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='white', width=2),
+                yaxis='y1'
+            ))
+        
+            # Network Hashrate displayed in MH/s, labeled as GH/s
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['network_hashrate_ghs'],
+                mode='lines',
+                name='Network Hashrate (GH/s)',
+                line=dict(color='deepskyblue', width=2, dash='dot'),
+                hovertemplate='%{y:.2f} GH/s<extra></extra>',
+                yaxis='y1'
+            ))
+        
+            # Add stars for blocks found
+            block_times = df_chart[df_chart['block_found']]['timestamp']
+            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
+            fig.add_trace(go.Scatter(
+                x=block_times,
+                y=block_hashes,
+                mode='markers',
+                name='Block Found',
+                marker=dict(
+                    symbol='star',
+                    size=12,
+                    color='gold',
+                    line=dict(width=1, color='black')
+                ),
+                hovertemplate='Block found!<extra></extra>'
+            ))
+
+            # Layout
+            fig.update_layout(
+                title='Pool & Network Hashrate Over Time',
+                xaxis=dict(title='Timestamp'),
+                yaxis=dict(
+                    title='Hashrate',
+                    tickformat=',.0f',
+                ),
+                legend=dict(
+                    orientation='h',
+                    yanchor='bottom',
+                    y=1.02,
+                    xanchor='right',
+                    x=1
+                ),
+                margin=dict(l=40, r=20, t=40, b=40),
+                height=450
+            )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("No pool data available to display.")
     
-        # Layout
-        fig.update_layout(
-            title='Pool & Network Hashrate Over Time (Downsampled to 5-minute intervals)',
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Price Chart in second column
+with col2:
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("### Price Charts")
+    
+    if not price_df.empty and current_prices:
+        # Create price chart
+        fig_prices = go.Figure()
+        
+        # Add XMR price
+        xmr_df = price_df[price_df['symbol'] == 'XMR']
+        fig_prices.add_trace(go.Scatter(
+            x=xmr_df['timestamp'],
+            y=xmr_df['close'],
+            mode='lines',
+            name='XMR Price (USD)',
+            line=dict(color='limegreen', width=2),
+            yaxis='y1'
+        ))
+        
+        # Add QUBIC price (on secondary axis)
+        qubic_df = price_df[price_df['symbol'] == 'QUBIC']
+        fig_prices.add_trace(go.Scatter(
+            x=qubic_df['timestamp'],
+            y=qubic_df['close'],
+            mode='lines',
+            name='QUBIC Price (USD)',
+            line=dict(color='magenta', width=2),
+            yaxis='y2'
+        ))
+        
+        # Layout with dual y-axes
+        fig_prices.update_layout(
+            title='XMR & QUBIC Prices (24h)',
             xaxis=dict(title='Timestamp'),
             yaxis=dict(
-                title='Hashrate',
-                tickformat=',.0f',
+                title='XMR Price (USD)',
+                tickformat='$.2f',
+                side='left',
+                showgrid=False
+            ),
+            yaxis2=dict(
+                title='QUBIC Price (USD)',
+                tickformat='$.6f',
+                overlaying='y',
+                side='right',
+                showgrid=False
             ),
             legend=dict(
                 orientation='h',
@@ -430,27 +469,53 @@ if not df.empty:
                 xanchor='right',
                 x=1
             ),
-            margin=dict(l=40, r=20, t=40, b=40),
+            margin=dict(l=40, r=40, t=40, b=40),
             height=450
         )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-    if st.button("🔄 Manual Refresh"):
-        st.cache_data.clear()
-        st.rerun()
         
-    # Add a data source note
-    st.markdown(
-    """
-    <div style="margin-top: 1em; font-size: 0.9em; color: gray;">
-        📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a>).<br>
-        💰 <strong>Price Data:</strong> Gate.io exchange (via CCXT).<br>
-        💌 <strong>Inspired by:</strong> <a href="https://qubic-xmr.vercel.app/" target="_blank">qubic-xmr.vercel.app</a>.<br>
-        ⏱️ <em>Note:</em> Data is slightly delayed due to the data collection approach.
-    </div>
-    """,
-    unsafe_allow_html=True
-    )
-else:
-    st.warning("No data available to display.")
+        st.plotly_chart(fig_prices, use_container_width=True)
+        
+        # Add current price information
+        st.markdown("#### Current Prices")
+        price_cols = st.columns(2)
+        with price_cols[0]:
+            price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>XMR PRICE</div>
+                <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
+                <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with price_cols[1]:
+            price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>QUBIC PRICE</div>
+                <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
+                <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.warning("No price data available to display.")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Refresh button and footer
+if st.button("🔄 Manual Refresh"):
+    st.cache_data.clear()
+    st.rerun()
+    
+# Add a data source note
+st.markdown(
+"""
+<div style="margin-top: 1em; font-size: 0.9em; color: gray;">
+    📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a>).<br>
+    💰 <strong>Price Data:</strong> MEXC exchange (via CCXT).<br>
+    💌 <strong>Inspired by:</strong> <a href="https://qubic-xmr.vercel.app/" target="_blank">qubic-xmr.vercel.app</a>.<br>
+    ⏱️ <em>Note:</em> Data is slightly delayed due to the data collection approach.
+</div>
+""",
+unsafe_allow_html=True
+)
