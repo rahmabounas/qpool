@@ -5,18 +5,12 @@ import requests
 import time
 import ccxt
 import numpy as np
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
 
 # Configuration
-GITHUB_RAW_URL = "http://66.179.92.83/data/pool_stats_V2.csv"
+GITHUB_RAW_URL = "http://66.179.92.83/data/p1.csv"
 REFRESH_INTERVAL = 5  # seconds
-
-# GitHub settings
-GITHUB_OWNER = "B4k469420"
-GITHUB_REPO = "qpool"
-GITHUB_BRANCH = "main"
 
 # Setup page
 st.set_page_config(
@@ -26,9 +20,9 @@ st.set_page_config(
 )
 
 # Initialize exchange
-GATEIO_EXCHANGE = ccxt.mexc({
+EXCHANGE = ccxt.mexc({
     'enableRateLimit': True,
-    'rateLimit': 3000,  # requests per minute
+    'rateLimit': 3000,
 })
 
 # Custom CSS
@@ -38,7 +32,6 @@ st.markdown("""
         background-color: #202e3c !important;
         color: white !important;
     }
-
     .metric-card {
         background: rgba(32, 46, 60, 0.9);
         border-radius: 10px;
@@ -51,34 +44,11 @@ st.markdown("""
         flex-direction: column;
         justify-content: space-between;
     }
-
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #4cc9f0;
-        margin: 0.2rem 0;
-    }
-
-    .delta-value {
-        text-align: right;
-        font-size: 0.9rem;
-        color: gray;
-        margin-top: auto;
-    }
-
-    .block-indicator {
-        color: #f72585;
-        font-weight: bold;
-    }
-    
-    .price-positive {
-        color: #4ade80;
-    }
-    
-    .price-negative {
-        color: #f87171;
-    }
-    
+    .metric-value { font-size: 1.8rem; font-weight: bold; color: #4cc9f0; margin: 0.2rem 0; }
+    .delta-value { text-align: right; font-size: 0.9rem; color: gray; margin-top: auto; }
+    .block-indicator { color: #f72585; font-weight: bold; }
+    .price-positive { color: #4ade80; }
+    .price-negative { color: #f87171; }
     .chart-container {
         background: rgba(32, 46, 60, 0.7);
         border-radius: 10px;
@@ -88,80 +58,63 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data(ttl=5, show_spinner="Loading latest data...")
+@st.cache_data(ttl=5, show_spinner="Loading data...")
 def load_data():
-    url = GITHUB_RAW_URL.format(owner=GITHUB_OWNER, repo=GITHUB_REPO, branch=GITHUB_BRANCH)
     try:
-        timestamp = int(time.time())
-        df = pd.read_csv(f"{url}?t={timestamp}")
+        df = pd.read_csv(f"{GITHUB_RAW_URL}?t={int(time.time())}")
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df = df.sort_values('timestamp').reset_index(drop=True)
+        df.sort_values('timestamp', inplace=True)
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
         return df
     except Exception as e:
-        st.error(f"⚠️ Data loading error: {str(e)}")
+        st.error(f"Data loading error: {str(e)}")
         return pd.DataFrame()
 
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def fetch_price_data():
+@st.cache_data(ttl=300)
+def fetch_prices():
     try:
-        # Fetch current prices
-        xmr_ticker = GATEIO_EXCHANGE.fetch_ticker('XMR/USDT')
-        qubic_ticker = GATEIO_EXCHANGE.fetch_ticker('QUBIC/USDT')
-        
-        # Fetch historical data (last 24 hours)
-        since = GATEIO_EXCHANGE.milliseconds() - 86400 * 1000  # 24 hours ago
-        xmr_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('XMR/USDT', '1h', since=since)
-        qubic_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('QUBIC/USDT', '1h', since=since)
-        
-        # Create DataFrames
-        xmr_df = pd.DataFrame(xmr_ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        xmr_df['timestamp'] = pd.to_datetime(xmr_df['timestamp'], unit='ms')
-        xmr_df['symbol'] = 'XMR'
-        
-        qubic_df = pd.DataFrame(qubic_ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        qubic_df['timestamp'] = pd.to_datetime(qubic_df['timestamp'], unit='ms')
-        qubic_df['symbol'] = 'QUBIC'
-        
-        # Combine and return
-        price_df = pd.concat([xmr_df, qubic_df])
-        current_prices = {
-            'XMR': xmr_ticker['last'],
-            'QUBIC': qubic_ticker['last'],
-            'XMR_change': xmr_ticker['percentage'],
-            'QUBIC_change': qubic_ticker['percentage']
-        }
-        return price_df, current_prices
+        xmr_ticker = EXCHANGE.fetch_ticker('XMR/USDT')
+        qubic_ticker = EXCHANGE.fetch_ticker('QUBIC/USDT')
+
+        since = EXCHANGE.milliseconds() - 86400 * 1000
+        xmr_ohlcv = EXCHANGE.fetch_ohlcv('XMR/USDT', '1h', since=since)
+        qubic_ohlcv = EXCHANGE.fetch_ohlcv('QUBIC/USDT', '1h', since=since)
+
+        def build_df(ohlcv, symbol):
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df['symbol'] = symbol
+            return df
+
+        return (pd.concat([build_df(xmr_ohlcv, 'XMR'), build_df(qubic_ohlcv, 'QUBIC')]),
+                {
+                    'XMR': xmr_ticker['last'],
+                    'QUBIC': qubic_ticker['last'],
+                    'XMR_change': xmr_ticker['percentage'],
+                    'QUBIC_change': qubic_ticker['percentage']
+                })
     except Exception as e:
-        st.error(f"Error fetching price data: {str(e)}")
+        st.error(f"Price fetch error: {str(e)}")
         return pd.DataFrame(), {}
 
 def format_hashrate(h):
     if h >= 1e9: return f"{h/1e9:.2f} GH/s"
-    elif h >= 1e6: return f"{h/1e6:.2f} MH/s"
-    elif h >= 1e3: return f"{h/1e3:.2f} KH/s"
+    if h >= 1e6: return f"{h/1e6:.2f} MH/s"
+    if h >= 1e3: return f"{h/1e3:.2f} KH/s"
     return f"{h:.2f} H/s"
 
 def format_timespan(delta):
-    if delta.days > 0:
-        return f"{delta.days}d {delta.seconds//3600}h ago"
-    hours = delta.seconds // 3600
-    minutes = (delta.seconds % 3600) // 60
-    return f"{hours}h {minutes}m ago"
+    if delta.days > 0: return f"{delta.days}d {delta.seconds//3600}h ago"
+    return f"{delta.seconds//3600}h {(delta.seconds%3600)//60}m ago"
 
-def downsample_data(df, interval='5T'):
-    """Downsample data while preserving important points (ATH, blocks found)."""
-    if df.empty:
-        return df
+def downsample(df, interval='5T'):
+    if df.empty: return df
+    ath = df['pool_hashrate'].idxmax()
+    blocks = df[df['block_found']].index
 
-    # Identify important points to keep
-    ath_idx = df['pool_hashrate'].idxmax()
-    block_indices = df[df['block_found']].index
-
-    # Downsample main data
-    df_downsampled = df.resample(interval, on='timestamp').agg({
+    df_resampled = df.resample(interval, on='timestamp').agg({
         'pool_hashrate': 'mean',
         'pool_hashrate_mhs': 'mean',
         'network_hashrate': 'mean',
@@ -170,81 +123,42 @@ def downsample_data(df, interval='5T'):
         'block_found': 'any'
     }).reset_index()
 
-    # Ensure timestamp is datetime
-    df_downsampled['timestamp'] = pd.to_datetime(df_downsampled['timestamp'])
+    extra_points = pd.concat([df.loc[[ath]]] + [df.loc[[i]] for i in blocks if i not in df_resampled.index])
+    df_combined = pd.concat([df_resampled, extra_points]).sort_values('timestamp').drop_duplicates('timestamp')
+    df_combined['block_found'] = df_combined['pool_blocks_found'].diff().fillna(0) > 0
+    return df_combined
 
-    # Add ATH point if it's not already in downsampled range
-    ath_timestamp = df.loc[ath_idx, 'timestamp']
-    
-    if not ((df_downsampled['timestamp'] >= ath_timestamp - pd.Timedelta(interval)) & 
-            (df_downsampled['timestamp'] <= ath_timestamp + pd.Timedelta(interval))).any():
-            df_downsampled = pd.concat([df_downsampled, df.loc[[ath_idx]]], ignore_index=True)
-
-    # Add all block points ("stars") if not already in the downsampled set
-    for idx in block_indices:
-        block_time = df.loc[idx, 'timestamp']
-        if not ((df_downsampled['timestamp'] >= block_time - pd.Timedelta(interval)) & 
-                (df_downsampled['timestamp'] <= block_time + pd.Timedelta(interval))).any():
-            df_downsampled = pd.concat([df_downsampled, df.loc[[idx]]], ignore_index=True)
-
-    # Final clean-up
-    df_downsampled = df_downsampled.sort_values('timestamp').drop_duplicates('timestamp', keep='last')
-    df_downsampled['block_found'] = df_downsampled['pool_blocks_found'].diff().fillna(0) > 0
-
-    return df_downsampled
-
-# Load Data
+# Load
 df = load_data()
-price_df, current_prices = fetch_price_data()
+prices_df, current_prices = fetch_prices()
 
-# Calculate mean hashrate for the last 6 hours
-if not df.empty:
-    six_hours_ago = df['timestamp'].max() - timedelta(hours=6)
-    df_last_6h = df[df['timestamp'] >= six_hours_ago]
-    mean_hashrate_6h = df_last_6h['pool_hashrate'].mean() / 1e6 if not df_last_6h.empty else 0
-
-# Metrics Cards
+# Metrics
 if not df.empty:
     latest = df.iloc[-1]
-    mean_hashrate = df['pool_hashrate'].mean()
-    mean_hashrate_mhs = mean_hashrate / 1e6
-    block_count = int(df['pool_blocks_found'].max())
-    delta_pool = df['pool_hashrate_mhs'].diff().iloc[-1]
-    delta_net = df['network_hashrate_ghs'].diff().iloc[-1]
+    six_hr = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=6))]
+    mean_hash_6h = six_hr['pool_hashrate'].mean() / 1e6 if not six_hr.empty else 0
+    ath_val = df['pool_hashrate'][:-1].max()
+    ath_time = df[df['pool_hashrate'] == ath_val]['timestamp'].iloc[0].strftime('%Y-%m-%d')
+    last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
+    time_since_block = format_timespan(latest['timestamp'] - last_block) if last_block else "No block"
 
-    # Calculate previous ATH (excluding current value)
-    previous_ath = df['pool_hashrate'][:-1].max()
-    previous_ath_mhs = previous_ath / 1e6
-    ath_date = df.loc[df['pool_hashrate'] == previous_ath, 'timestamp'].iloc[0].strftime('%Y-%m-%d')
-    
-    # Calculate time since last block
-    if df['block_found'].any():
-        last_block_time = df[df['block_found']]['timestamp'].iloc[-1]
-        time_since_block = format_timespan(latest['timestamp'] - last_block_time)
-    else:
-        time_since_block = "No blocks found yet"
-
-
-# Create two columns for charts
 col1, col2 = st.columns([3, 2])
 
-# Pool Stats Chart in first column
 with col1:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.markdown("### Pool Statistics")
-    cols = st.columns(2)
-    with cols[0]:
+    c1, c2 = st.columns(2)
+    with c1:
         st.markdown(f"""
         <div class="metric-card">
             <div>POOL HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
             <div style="margin-top: 10px;">MEAN (6H)</div>
-            <div class="metric-value">{mean_hashrate_6h:.2f} MH/s</div>
-            <div class="delta-value">ATH: {previous_ath_mhs:.2f} MH/s ({ath_date})</div>
+            <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
+            <div class="delta-value">ATH: {ath_val/1e6:.2f} MH/s ({ath_time})</div>
         </div>
         """, unsafe_allow_html=True)
-
-    with cols[1]:
+    with c2:
         st.markdown(f"""
         <div class="metric-card">
             <div>BLOCKS FOUND</div>
@@ -255,234 +169,59 @@ with col1:
         </div>
         """, unsafe_allow_html=True)
 
-    
     if not df.empty:
-        # Downsample the data for better performance
-        df_chart = downsample_data(df)
-        
-        if st.session_state.get('show_candlestick', False):
-            # Candlestick Easter Egg Mode
-            st.warning("👀 I told you not to click that! Enjoy the secret candlestick view.")
-            
-            # Create candlestick chart
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-            
-            # Candlestick trace (using downsampled data)
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['pool_hashrate_mhs'],
-                mode='lines',
-                name='Pool Hashrate (MH/s)',
-                line=dict(color='white', width=2),
-                yaxis='y1'
-            ), secondary_y=False)
-            
-            # Network hashrate
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['network_hashrate_ghs'],
-                mode='lines',
-                name='Network Hashrate (GH/s)',
-                line=dict(color='deepskyblue', width=2, dash='dot'),
-                hovertemplate='%{y:.2f} GH/s<extra></extra>',
-                yaxis='y1'
-            ), secondary_y=True)
-            
-            # Add stars for blocks found
-            block_times = df_chart[df_chart['block_found']]['timestamp']
-            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
-            fig.add_trace(go.Scatter(
-                x=block_times,
-                y=block_hashes,
-                mode='markers',
-                name='Block Found',
-                marker=dict(
-                    symbol='star',
-                    size=12,
-                    color='gold',
-                    line=dict(width=1, color='black')
-                ),
-                hovertemplate='Block found!<extra></extra>'
-            ), secondary_y=False)
-            
-            # Layout
-            fig.update_layout(
-                title='SECRET VIEW: Pool Hashrate (Downsampled) & Network Hashrate',
-                xaxis=dict(title='Timestamp'),
-                yaxis=dict(title='Pool Hashrate (MH/s)'),
-                yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right'),
-                legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-                margin=dict(l=40, r=40, t=40, b=40),
-                height=450
-            )
-            fig.update_xaxes(rangeslider_visible=True)
-            
-        else:
-            fig = go.Figure()
-        
-            # Pool Hashrate (MH/s) - using downsampled data
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['pool_hashrate_mhs'],
-                mode='lines',
-                name='Pool Hashrate (MH/s)',
-                line=dict(color='white', width=2),
-                yaxis='y1'
-            ))
-        
-            # Network Hashrate displayed in MH/s, labeled as GH/s
-            fig.add_trace(go.Scatter(
-                x=df_chart['timestamp'],
-                y=df_chart['network_hashrate_ghs'],
-                mode='lines',
-                name='Network Hashrate (GH/s)',
-                line=dict(color='deepskyblue', width=2, dash='dot'),
-                hovertemplate='%{y:.2f} GH/s<extra></extra>',
-                yaxis='y1'
-            ))
-        
-            # Add stars for blocks found
-            block_times = df_chart[df_chart['block_found']]['timestamp']
-            block_hashes = df_chart[df_chart['block_found']]['pool_hashrate_mhs']
-            fig.add_trace(go.Scatter(
-                x=block_times,
-                y=block_hashes,
-                mode='markers',
-                name='Block Found',
-                marker=dict(
-                    symbol='star',
-                    size=12,
-                    color='gold',
-                    line=dict(width=1, color='black')
-                ),
-                hovertemplate='Block found!<extra></extra>'
-            ))
-
-            # Layout
-            fig.update_layout(
-                title='Pool & Network Hashrate Over Time',
-                xaxis=dict(title='Timestamp'),
-                yaxis=dict(
-                    title='Hashrate',
-                    tickformat=',.0f',
-                ),
-                legend=dict(
-                    orientation='h',
-                    yanchor='bottom',
-                    y=1.02,
-                    xanchor='right',
-                    x=1
-                ),
-                margin=dict(l=40, r=20, t=40, b=40),
-                height=450
-            )
-
+        df_chart = downsample(df)
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=df_chart['timestamp'], y=df_chart['pool_hashrate_mhs'], name='Pool Hashrate (MH/s)', line=dict(color='white')))
+        fig.add_trace(go.Scatter(x=df_chart['timestamp'], y=df_chart['network_hashrate_ghs'], name='Network Hashrate (GH/s)', line=dict(color='deepskyblue', dash='dot')))
+        blocks = df_chart[df_chart['block_found']]
+        fig.add_trace(go.Scatter(x=blocks['timestamp'], y=blocks['pool_hashrate_mhs'], mode='markers', name='Block Found', marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black'))))
+        fig.update_layout(title='Hashrate Over Time', xaxis_title='Time', yaxis_title='Hashrate', height=450)
         st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.warning("No pool data available to display.")
-    
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Price Chart in second column
 with col2:
     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
     st.markdown("### Price Charts")
-    colsPrice = st.columns(2)
-    with colsPrice[0]:
-        price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>XMR PRICE</div>
-            <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
-            <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    with colsPrice[1]:
-        price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
-        st.markdown(f"""
-        <div class="metric-card">
-            <div>QUBIC PRICE</div>
-            <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
-            <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    if not price_df.empty and current_prices:
-        # Create price chart
-        fig_prices = go.Figure()
-        
-        # Add XMR price
-        xmr_df = price_df[price_df['symbol'] == 'XMR']
-        fig_prices.add_trace(go.Scatter(
-            x=xmr_df['timestamp'],
-            y=xmr_df['close'],
-            mode='lines',
-            name='XMR Price (USD)',
-            line=dict(color='limegreen', width=2),
-            yaxis='y1'
-        ))
-        
-        # Add QUBIC price (on secondary axis)
-        qubic_df = price_df[price_df['symbol'] == 'QUBIC']
-        fig_prices.add_trace(go.Scatter(
-            x=qubic_df['timestamp'],
-            y=qubic_df['close'],
-            mode='lines',
-            name='QUBIC Price (USD)',
-            line=dict(color='magenta', width=2),
-            yaxis='y2'
-        ))
-        
-        # Layout with dual y-axes
-        fig_prices.update_layout(
+    p1, p2 = st.columns(2)
+    for coin, label, col in zip(['XMR', 'QUBIC'], ['XMR PRICE', 'QUBIC PRICE'], [p1, p2]):
+        change = current_prices.get(f'{coin}_change', 0)
+        cls = 'price-positive' if change >= 0 else 'price-negative'
+        val = current_prices.get(coin, 0)
+        fmt = '.2f' if coin == 'XMR' else '.6f'
+        with col:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>{label}</div>
+                <div class="metric-value">${val:{fmt}}</div>
+                <div class="delta-value {cls}">{change:.2f}%</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    if not prices_df.empty:
+        fig = go.Figure()
+        for coin, color, axis in [('XMR', 'limegreen', 'y1'), ('QUBIC', 'magenta', 'y2')]:
+            df_coin = prices_df[prices_df['symbol'] == coin]
+            fig.add_trace(go.Scatter(x=df_coin['timestamp'], y=df_coin['close'], name=f'{coin} Price', line=dict(color=color), yaxis=axis))
+
+        fig.update_layout(
             title='XMR & QUBIC Prices (24h)',
-            xaxis=dict(title='Timestamp'),
-            yaxis=dict(
-                title='XMR Price (USD)',
-                tickformat='$.2f',
-                side='left',
-                showgrid=False
-            ),
-            yaxis2=dict(
-                title='QUBIC Price (USD)',
-                tickformat='$.7f',
-                overlaying='y',
-                side='right',
-                showgrid=False
-            ),
-            legend=dict(
-                orientation='h',
-                yanchor='bottom',
-                y=1.02,
-                xanchor='right',
-                x=1
-            ),
-            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis_title='Timestamp',
+            yaxis=dict(title='XMR Price (USD)', side='left'),
+            yaxis2=dict(title='QUBIC Price (USD)', overlaying='y', side='right'),
             height=450
         )
-        
-        st.plotly_chart(fig_prices, use_container_width=True)
-        
-    else:
-        st.warning("No price data available to display.")
-    
+        st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Refresh button and footer
 if st.button("🔄 Manual Refresh"):
     st.cache_data.clear()
     st.rerun()
-    
-# Add a data source note
-st.markdown(
-"""
+
+st.markdown("""
 <div style="margin-top: 1em; font-size: 0.9em; color: gray;">
-    📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a> (<a href="https://github.com/jtgrassie/monero-pool" target="_blank">https://github.com/jtgrassie/monero-pool</a>).<br>
-    💰 <strong>Price Data:</strong> MEXC exchange (via CCXT).<br>
-    💌 <strong>Inspired by:</strong> <a href="https://qubic-xmr.vercel.app/" target="_blank">qubic-xmr.vercel.app</a>.<br>
-    ⏱️ <em>Note:</em> Data is slightly delayed due to the data collection approach.
+📊 <strong>Data Source:</strong> <a href="https://xmr-stats.qubic.org/" target="_blank">xmr-stats.qubic.org</a>.<br>
+💰 <strong>Price Data:</strong> MEXC (via CCXT).<br>
+💌 <strong>Inspired by:</strong> <a href="https://qubic-xmr.vercel.app/" target="_blank">qubic-xmr.vercel.app</a>.<br>
 </div>
-""",
-unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
