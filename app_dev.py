@@ -226,7 +226,7 @@ if not df.empty:
 
 
 # Create two columns for charts
-col1, col2 = st.columns([2, 1])
+col1, col2 = st.columns([3, 2])
 
 # Pool Stats Chart in first column
 with col1:
@@ -475,28 +475,6 @@ with col2:
         
         st.plotly_chart(fig_prices, use_container_width=True)
         
-        # Add current price information
-        st.markdown("#### Current Prices")
-        price_cols = st.columns(2)
-        with price_cols[0]:
-            price_change_class = "price-positive" if current_prices.get('XMR_change', 0) >= 0 else "price-negative"
-            st.markdown(f"""
-            <div class="metric-card">
-                <div>XMR PRICE</div>
-                <div class="metric-value">${current_prices.get('XMR', 0):.2f}</div>
-                <div class="delta-value {price_change_class}">{current_prices.get('XMR_change', 0):.2f}%</div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        with price_cols[1]:
-            price_change_class = "price-positive" if current_prices.get('QUBIC_change', 0) >= 0 else "price-negative"
-            st.markdown(f"""
-            <div class="metric-card">
-                <div>QUBIC PRICE</div>
-                <div class="metric-value">${current_prices.get('QUBIC', 0):.6f}</div>
-                <div class="delta-value {price_change_class}">{current_prices.get('QUBIC_change', 0):.2f}%</div>
-            </div>
-            """, unsafe_allow_html=True)
     else:
         st.warning("No price data available to display.")
     
