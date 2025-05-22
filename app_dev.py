@@ -26,7 +26,7 @@ st.set_page_config(
 )
 
 # Initialize exchange
-GATEIO_EXCHANGE = ccxt.gateio({
+GATEIO_EXCHANGE = ccxt.mexc({
     'enableRateLimit': True,
     'rateLimit': 3000,  # requests per minute
 })
@@ -101,13 +101,13 @@ def load_data():
 def fetch_price_data():
     try:
         # Fetch current prices
-        xmr_ticker = GATEIO_EXCHANGE.fetch_ticker('XMR_USDT')
-        qubic_ticker = GATEIO_EXCHANGE.fetch_ticker('QUBIC_USDT')
+        xmr_ticker = GATEIO_EXCHANGE.fetch_ticker('XMR/USDT')
+        qubic_ticker = GATEIO_EXCHANGE.fetch_ticker('QUBIC/USDT')
         
         # Fetch historical data (last 24 hours)
         since = GATEIO_EXCHANGE.milliseconds() - 86400 * 1000  # 24 hours ago
-        xmr_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('XMR_USDT', '1h', since=since)
-        qubic_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('QUBIC_USDT', '1h', since=since)
+        xmr_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('XMR/USDT', '1h', since=since)
+        qubic_ohlcv = GATEIO_EXCHANGE.fetch_ohlcv('QUBIC/USDT', '1h', since=since)
         
         # Create DataFrames
         xmr_df = pd.DataFrame(xmr_ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
