@@ -84,8 +84,13 @@ def load_data():
         df['pool_hashrate_mhs'] = df['pool_hashrate'] / 1e6
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
-        df['qubic_usdt'] = df['qubic_usdt'].astype(float, errors='ignore')
-        df['close'] = df['close'].astype(float, errors='ignore')
+        # Ensure price columns are numeric
+        for col in ['qubic_usdt', 'close']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        # Log data summary for debugging
+        st.write(f"Data loaded: {len(df)} rows, Columns: {list(df.columns)}")
+        st.write(f"NaN in close: {df['close'].isna().sum()}, qubic_usdt: {df['qubic_usdt'].isna().sum()}")
         return df
     except Exception as e:
         st.error(f"Data loading error: {str(e)}")
@@ -146,7 +151,6 @@ if not df.empty:
     last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
     time_since_block = format_timespan(latest['timestamp'] - last_block) if last_block else "No block"
 
-    # Metric Cards in a single row
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown(f"""
@@ -226,38 +230,54 @@ st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
 st.markdown("### XMR & QUBIC Price (USD)")
 if not df.empty and 'qubic_usdt' in df.columns and 'close' in df.columns:
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['close'],
-        name='XMR/USDT',
-        line=dict(color='#4ade80'),
-        hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
-    ))
-    fig.add_trace(go.Scatter(
-        x=df['timestamp'],
-        y=df['qubic_usdt'],
-        name='QUBIC/USDT',
-        line=dict(color='#f72585'),
-        hovertemplate='%{x|%Y-%m-%d %H:%M}<br>QUBIC: $%{y:.6f}<extra></extra>',
-        yaxis='y2'
-    ))
-    fig.update_layout(
-        title='XMR and QUBIC Prices',
-        xaxis=dict(title='Time', gridcolor='rgba(255,255,255,0.1)'),
-        yaxis=dict(title='XMR Price (USD)', titlefont=dict(color='#4ade80'), tickfont=dict(color='#4ade80'), gridcolor='rgba(255,255,255,0.1)'),
-        yaxis2=dict(title='QUBIC Price (USD)', titlefont=dict(color='#f72585'), tickfont=dict(color='#f72585'), overlaying='y', side='right'),
-        height=500,
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='white'),
-        showlegend=True,
-        legend=dict(x=0, y=1.1, orientation='h'),
-        hovermode='x unified'
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    # Filter out rows with NaN in price columns
+    df_price = df.dropna(subset=['close', 'qubic_usdt'])
+    if df_price.empty:
+        st.warning("No valid price data available after filtering NaN values.")
+    else:
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(go.Scatter(
+            x=df_price['timestamp'],
+            y=df_price['close'],
+            name='XMR/USDT',
+            line=dict(color='#4ade80'),
+            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_price['timestamp'],
+            y=df_price['qubic_usdt'],
+            name='QUBIC/USDT',
+            line=dict(color='#f72585'),
+            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>QUBIC: $%{y:.6f}<extra></extra>',
+            yaxis='y2'
+        ))
+        fig.update_layout(
+            title='XMR and QUBIC Prices',
+            xaxis=dict(title='Time', gridcolor='rgba(255,255,255,0.1)'),
+            yaxis=dict(
+                title='XMR Price (USD)',
+                titlefont=dict(color='#4ade80'),
+                tickfont=dict(color='#4ade80'),
+                gridcolor='rgba(255,255,255,0.1)'
+            ),
+            yaxis2=dict(
+                title='QUBIC Price (USD)',
+                titlefont=dict(color='#f72585'),
+                tickfont=dict(color='#f72585'),
+                overlaying='y',
+                side='right'
+            ),
+            height=500,
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            showlegend=True,
+            legend=dict(x=0, y=1.1, orientation='h'),
+            hovermode='x'  # Fallback to 'x' to avoid unified hover issues
+        )
+        st.plotly_chart(fig, use_container_width=True)
 else:
-    st.info("No price data available.")
+    st.info("No price data available or missing required columns (close, qubic_usdt).")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
