@@ -210,7 +210,7 @@ if not df.empty:
         xaxis=dict(
             title='Time',
             gridcolor='rgba(255,255,255,0.1)',
-            rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
+            rangeslider=dict(visible=True, thickness=0.1),  # Add range slider
             rangeselector=dict(
                 buttons=list([
                     dict(count=24, label="24h", step="hour", stepmode="backward"),
