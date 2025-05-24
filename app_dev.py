@@ -211,7 +211,18 @@ if not df.empty:
             title='Time',
             gridcolor='rgba(255,255,255,0.1)',
             rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
-            range=[start_time, end_time],  # Set default to last 24 hours
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1h", step="hour", stepmode="backward"),
+                    dict(count=6, label="6h", step="hour", stepmode="backward"),
+                    dict(count=24, label="24h", step="hour", stepmode="backward"),
+                    dict(step="all", label="All")
+                ]),
+                bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
+                font=dict(color='white'),  # White text for buttons
+                activecolor='#4cc9f0'  # Match your theme’s accent color
+            ),
+            range=[start_time, end_time],  # Default to last 24 hours
             type='date'
         ),
         yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
@@ -260,13 +271,24 @@ if not df_chart.empty:
     end_time = df_chart['timestamp'].max()
     start_time = end_time - timedelta(hours=24)
     
-    # Layout with dual y-axes and range slider
+    # Layout with dual y-axes, range slider, and range selector
     fig_prices.update_layout(
         title='XMR & QUBIC Prices (24h)',
         xaxis=dict(
             title='Timestamp',
             rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
-            range=[start_time, end_time],  # Set default to last 24 hours
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1h", step="hour", stepmode="backward"),
+                    dict(count=6, label="6h", step="hour", stepmode="backward"),
+                    dict(count=24, label="24h", step="hour", stepmode="backward"),
+                    dict(step="all", label="All")
+                ]),
+                bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
+                font=dict(color='white'),  # White text for buttons
+                activecolor='#4cc9f0'  # Match your theme’s accent color
+            ),
+            range=[start_time, end_time],  # Default to last 24 hours
             type='date'
         ),
         yaxis=dict(
