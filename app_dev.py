@@ -83,8 +83,8 @@ def load_data():
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         # Log data summary for debugging
-        st.write(f"Data loaded: {len(df)} rows, Columns: {list(df.columns)}")
-        st.write(f"NaN in close: {df['close'].isna().sum()}, qubic_usdt: {df['qubic_usdt'].isna().sum()}")
+        # st.write(f"Data loaded: {len(df)} rows, Columns: {list(df.columns)}")
+        # st.write(f"NaN in close: {df['close'].isna().sum()}, qubic_usdt: {df['qubic_usdt'].isna().sum()}")
         return df
     except Exception as e:
         st.error(f"Data loading error: {str(e)}")
@@ -223,74 +223,65 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Price Chart with Stacked Subplots
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
 st.markdown("### XMR & QUBIC Price (USD)")
-if not df.empty and 'qubic_usdt' in df.columns and 'close' in df.columns:
-    # Filter out rows with NaN in price columns
-    df_price = df.dropna(subset=['close', 'qubic_usdt'])
-    if df_price.empty:
-        st.warning("No valid price data available after filtering NaN values.")
-    else:
-        # Create stacked subplots with shared x-axis
-        fig = make_subplots(
-            rows=2, cols=1,
-            shared_xaxes=True,
-            vertical_spacing=0.05,
-            subplot_titles=("XMR/USDT Price", "QUBIC/USDT Price")
-        )
-        # XMR/USDT trace (top subplot)
-        fig.add_trace(
-            go.Scatter(
-                x=df_price['timestamp'],
-                y=df_price['close'],
-                name='XMR/USDT',
-                line=dict(color='#4ade80'),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
-            ),
-            row=1, col=1
-        )
-        # QUBIC/USDT trace (bottom subplot)
-        fig.add_trace(
-            go.Scatter(
-                x=df_price['timestamp'],
-                y=df_price['qubic_usdt'],
-                name='QUBIC/USDT',
-                line=dict(color='#f72585'),
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>QUBIC: $%{y:.6f}<extra></extra>'
-            ),
-            row=2, col=1
-        )
-        fig.update_layout(
-            title='XMR and QUBIC Prices',
-            height=600,  # Increased height to accommodate two subplots
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            showlegend=True,
-            legend=dict(x=0, y=1.05, orientation='h'),
-            hovermode='x unified'
-        )
-        # Update x-axis and y-axes for each subplot
-        fig.update_xaxes(
-            title_text='Time',
-            gridcolor='rgba(255,255,255,0.1)',
-            row=2, col=1  # Only show x-axis title on bottom subplot
-        )
-        fig.update_yaxes(
-            title_text='XMR Price (USD)',
-            titlefont=dict(color='#4ade80'),
-            tickfont=dict(color='#4ade80'),
-            gridcolor='rgba(255,255,255,0.1)',
-            row=1, col=1
-        )
-        fig.update_yaxes(
-            title_text='QUBIC Price (USD)',
-            titlefont=dict(color='#f72585'),
-            tickfont=dict(color='#f72585'),
-            gridcolor='rgba(255,255,255,0.1)',
-            row=2, col=1
-        )
-        st.plotly_chart(fig, use_container_width=True)
+if not df_chart.empty:
+    # Create price chart
+    fig_prices = go.Figure()
+    
+    # Add XMR price
+    xmr_df = price_df[price_df['symbol'] == 'close']
+    fig_prices.add_trace(go.Scatter(
+        x=xmr_df['timestamp'],
+        y=xmr_df['close'],
+        mode='lines',
+        name='XMR Price (USD)',
+        line=dict(color='limegreen', width=2),
+        yaxis='y1'
+    ))
+    
+    # Add QUBIC price (on secondary axis)
+    qubic_df = price_df[price_df['symbol'] == 'qubic_usdt']
+    fig_prices.add_trace(go.Scatter(
+        x=qubic_df['timestamp'],
+        y=qubic_df['close'],
+        mode='lines',
+        name='QUBIC Price (USD)',
+        line=dict(color='magenta', width=2),
+        yaxis='y2'
+    ))
+    
+    # Layout with dual y-axes
+    fig_prices.update_layout(
+        title='XMR & QUBIC Prices (24h)',
+        xaxis=dict(title='Timestamp'),
+        yaxis=dict(
+            title='XMR Price (USD)',
+            tickformat='$.2f',
+            side='left',
+            showgrid=False
+        ),
+        yaxis2=dict(
+            title='QUBIC Price (USD)',
+            tickformat='$.9f',
+            overlaying='y',
+            side='right',
+            showgrid=False
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        ),
+        margin=dict(l=40, r=40, t=40, b=40),
+        height=450
+    )
+    
+    st.plotly_chart(fig_prices, use_container_width=True)
+    
 else:
-    st.info("No price data available or missing required columns (close, qubic_usdt).")
+    st.warning("No price data available to display.")
+
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
