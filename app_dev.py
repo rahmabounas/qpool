@@ -223,9 +223,9 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Price Chart with Stacked Subplots
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
 st.markdown("### XMR & QUBIC Price (USD)")
-if not df.empty and 'qubic_usdt' in df.columns and 'xmr_usdt' in df.columns:
+if not df.empty and 'qubic_usdt' in df.columns and 'close' in df.columns:
     # Filter out rows with NaN in price columns
-    df_price = df.dropna(subset=['xmr_usdt', 'qubic_usdt'])
+    df_price = df.dropna(subset=['close', 'qubic_usdt'])
     if df_price.empty:
         st.warning("No valid price data available after filtering NaN values.")
     else:
@@ -240,7 +240,7 @@ if not df.empty and 'qubic_usdt' in df.columns and 'xmr_usdt' in df.columns:
         fig.add_trace(
             go.Scatter(
                 x=df_price['timestamp'],
-                y=df_price['xmr_usdt'],
+                y=df_price['close'],
                 name='XMR/USDT',
                 line=dict(color='#4ade80'),
                 hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
@@ -290,7 +290,7 @@ if not df.empty and 'qubic_usdt' in df.columns and 'xmr_usdt' in df.columns:
         )
         st.plotly_chart(fig, use_container_width=True)
 else:
-    st.info("No price data available or missing required columns (xmr_usdt, qubic_usdt).")
+    st.info("No price data available or missing required columns (close, qubic_usdt).")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
