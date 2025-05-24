@@ -189,7 +189,7 @@ if not df.empty:
         x=df_chart['timestamp'],
         y=df_chart['network_hashrate_ghs'],
         name='Network Hashrate (GH/s)',
-        line=dict(color='#87ceeb', dash='dot'),
+        line=dict(color='#f72585', dash='dot'),
         yaxis='y2',
         hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
     ))
@@ -202,9 +202,18 @@ if not df.empty:
         marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
         hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
     ))
+    # Calculate the time range for the last 24 hours
+    end_time = df_chart['timestamp'].max()
+    start_time = end_time - timedelta(hours=24)
     fig.update_layout(
         title='Pool and Network Hashrate',
-        xaxis=dict(title='Time', gridcolor='rgba(255,255,255,0.1)'),
+        xaxis=dict(
+            title='Time',
+            gridcolor='rgba(255,255,255,0.1)',
+            rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
+            range=[start_time, end_time],  # Set default to last 24 hours
+            type='date'
+        ),
         yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
         yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
         height=500,
@@ -247,10 +256,19 @@ if not df_chart.empty:
         yaxis='y2'
     ))
     
-    # Layout with dual y-axes
+    # Calculate the time range for the last 24 hours
+    end_time = df_chart['timestamp'].max()
+    start_time = end_time - timedelta(hours=24)
+    
+    # Layout with dual y-axes and range slider
     fig_prices.update_layout(
         title='XMR & QUBIC Prices (24h)',
-        xaxis=dict(title='Timestamp'),
+        xaxis=dict(
+            title='Timestamp',
+            rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
+            range=[start_time, end_time],  # Set default to last 24 hours
+            type='date'
+        ),
         yaxis=dict(
             title='XMR Price (USD)',
             tickformat='$.2f',
@@ -272,14 +290,15 @@ if not df_chart.empty:
             x=1
         ),
         margin=dict(l=40, r=40, t=40, b=40),
-        height=450
+        height=450,
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white')
     )
     
     st.plotly_chart(fig_prices, use_container_width=True)
-    
 else:
     st.warning("No price data available to display.")
-
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
