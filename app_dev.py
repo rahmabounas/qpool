@@ -229,7 +229,7 @@ if not df_chart.empty:
     
     # Add XMR price
     fig_prices.add_trace(go.Scatter(
-        x=df_chart['timestamp_hour'],
+        x=df_chart['timestamp'],
         y=df_chart['close'],
         mode='lines',
         name='XMR Price (USD)',
@@ -239,7 +239,7 @@ if not df_chart.empty:
     
     # Add QUBIC price (on secondary axis)
     fig_prices.add_trace(go.Scatter(
-        x=df_chart['timestamp_hour'],
+        x=df_chart['timestamp'],
         y=df_chart['qubic_usdt'],
         mode='lines',
         name='QUBIC Price (USD)',
