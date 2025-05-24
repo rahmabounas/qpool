@@ -85,7 +85,7 @@ def load_data():
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
         df['qubic_usdt'] = df['qubic_usdt'].astype(float, errors='ignore')
-        df['xmr_usdt'] = df['xmr_usdt'].astype(float, errors='ignore')
+        df['xmr_usdt'] = df['close'].astype(float, errors='ignore')
         return df
     except Exception as e:
         st.error(f"Data loading error: {str(e)}")
