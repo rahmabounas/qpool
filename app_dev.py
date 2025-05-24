@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
 
 # Configuration
-GITHUB_RAW_URL = "http://66.179.92.83/data/p2.csv"
+GITHUB_RAW_URL = "http://66.179.92.83/data/p21a.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # Setup page
@@ -18,12 +18,6 @@ st.set_page_config(
     page_icon="⛏️",
     layout="wide"
 )
-
-# Initialize exchange
-EXCHANGE = ccxt.mexc({
-    'enableRateLimit': True,
-    'rateLimit': 3000,
-})
 
 # Custom CSS
 st.markdown("""
@@ -226,58 +220,77 @@ else:
     st.info("No hashrate data available.")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Price Chart with Dual Y-Axes
+# Price Chart with Stacked Subplots
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
 st.markdown("### XMR & QUBIC Price (USD)")
-if not df.empty and 'qubic_usdt' in df.columns and 'close' in df.columns:
+if not df.empty and 'qubic_usdt' in df.columns and 'xmr_usdt' in df.columns:
     # Filter out rows with NaN in price columns
-    df_price = df.dropna(subset=['close', 'qubic_usdt'])
+    df_price = df.dropna(subset=['xmr_usdt', 'qubic_usdt'])
     if df_price.empty:
         st.warning("No valid price data available after filtering NaN values.")
     else:
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(
-            x=df_price['timestamp'],
-            y=df_price['close'],
-            name='XMR/USDT',
-            line=dict(color='#4ade80'),
-            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
-        ))
-        fig.add_trace(go.Scatter(
-            x=df_price['timestamp'],
-            y=df_price['qubic_usdt'],
-            name='QUBIC/USDT',
-            line=dict(color='#f72585'),
-            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>QUBIC: $%{y:.6f}<extra></extra>',
-            yaxis='y2'
-        ))
+        # Create stacked subplots with shared x-axis
+        fig = make_subplots(
+            rows=2, cols=1,
+            shared_xaxes=True,
+            vertical_spacing=0.05,
+            subplot_titles=("XMR/USDT Price", "QUBIC/USDT Price")
+        )
+        # XMR/USDT trace (top subplot)
+        fig.add_trace(
+            go.Scatter(
+                x=df_price['timestamp'],
+                y=df_price['xmr_usdt'],
+                name='XMR/USDT',
+                line=dict(color='#4ade80'),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
+            ),
+            row=1, col=1
+        )
+        # QUBIC/USDT trace (bottom subplot)
+        fig.add_trace(
+            go.Scatter(
+                x=df_price['timestamp'],
+                y=df_price['qubic_usdt'],
+                name='QUBIC/USDT',
+                line=dict(color='#f72585'),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>QUBIC: $%{y:.6f}<extra></extra>'
+            ),
+            row=2, col=1
+        )
         fig.update_layout(
             title='XMR and QUBIC Prices',
-            xaxis=dict(title='Time', gridcolor='rgba(255,255,255,0.1)'),
-            yaxis=dict(
-                title='XMR Price (USD)',
-                titlefont=dict(color='#4ade80'),
-                tickfont=dict(color='#4ade80'),
-                gridcolor='rgba(255,255,255,0.1)'
-            ),
-            yaxis2=dict(
-                title='QUBIC Price (USD)',
-                titlefont=dict(color='#f72585'),
-                tickfont=dict(color='#f72585'),
-                overlaying='y',
-                side='right'
-            ),
-            height=500,
+            height=600,  # Increased height to accommodate two subplots
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             font=dict(color='white'),
             showlegend=True,
-            legend=dict(x=0, y=1.1, orientation='h'),
-            hovermode='x'  # Fallback to 'x' to avoid unified hover issues
+            legend=dict(x=0, y=1.05, orientation='h'),
+            hovermode='x unified'
+        )
+        # Update x-axis and y-axes for each subplot
+        fig.update_xaxes(
+            title_text='Time',
+            gridcolor='rgba(255,255,255,0.1)',
+            row=2, col=1  # Only show x-axis title on bottom subplot
+        )
+        fig.update_yaxes(
+            title_text='XMR Price (USD)',
+            titlefont=dict(color='#4ade80'),
+            tickfont=dict(color='#4ade80'),
+            gridcolor='rgba(255,255,255,0.1)',
+            row=1, col=1
+        )
+        fig.update_yaxes(
+            title_text='QUBIC Price (USD)',
+            titlefont=dict(color='#f72585'),
+            tickfont=dict(color='#f72585'),
+            gridcolor='rgba(255,255,255,0.1)',
+            row=2, col=1
         )
         st.plotly_chart(fig, use_container_width=True)
 else:
-    st.info("No price data available or missing required columns (close, qubic_usdt).")
+    st.info("No price data available or missing required columns (xmr_usdt, qubic_usdt).")
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
