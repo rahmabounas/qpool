@@ -213,8 +213,6 @@ if not df.empty:
             rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
             rangeselector=dict(
                 buttons=list([
-                    dict(count=1, label="1h", step="hour", stepmode="backward"),
-                    dict(count=6, label="6h", step="hour", stepmode="backward"),
                     dict(count=24, label="24h", step="hour", stepmode="backward"),
                     dict(step="all", label="All")
                 ]),
@@ -274,23 +272,6 @@ if not df_chart.empty:
     # Layout with dual y-axes, range slider, and range selector
     fig_prices.update_layout(
         title='XMR & QUBIC Prices (24h)',
-        xaxis=dict(
-            title='Timestamp',
-            rangeslider=dict(visible=True, thickness=0.05),  # Add range slider
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1, label="1h", step="hour", stepmode="backward"),
-                    dict(count=6, label="6h", step="hour", stepmode="backward"),
-                    dict(count=24, label="24h", step="hour", stepmode="backward"),
-                    dict(step="all", label="All")
-                ]),
-                bgcolor='rgba(32, 46, 60, 0.3)',  # Match dark theme
-                font=dict(color='white'),  # White text for buttons
-                activecolor='#acc9f0'  # Match your theme’s accent color
-            ),
-            range=[start_time, end_time],  # Default to last 24 hours
-            type='date'
-        ),
         yaxis=dict(
             title='XMR Price (USD)',
             tickformat='$.2f',
