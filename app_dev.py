@@ -284,9 +284,9 @@ if not df_chart.empty:
                     dict(count=24, label="24h", step="hour", stepmode="backward"),
                     dict(step="all", label="All")
                 ]),
-                bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
+                bgcolor='rgba(32, 46, 60, 0.3)',  # Match dark theme
                 font=dict(color='white'),  # White text for buttons
-                activecolor='#4cc9f0'  # Match your theme’s accent color
+                activecolor='#acc9f0'  # Match your theme’s accent color
             ),
             range=[start_time, end_time],  # Default to last 24 hours
             type='date'
