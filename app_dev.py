@@ -85,7 +85,7 @@ def load_data():
         df['network_hashrate_ghs'] = df['network_hashrate'] / 1e9
         df['block_found'] = df['pool_blocks_found'].diff().fillna(0) > 0
         df['qubic_usdt'] = df['qubic_usdt'].astype(float, errors='ignore')
-        df['xmr_usdt'] = df['close'].astype(float, errors='ignore')
+        df['close'] = df['close'].astype(float, errors='ignore')
         return df
     except Exception as e:
         st.error(f"Data loading error: {str(e)}")
@@ -122,7 +122,7 @@ def downsample(df, interval='5T'):
         'pool_blocks_found': 'last',
         'block_found': 'any',
         'qubic_usdt': 'last',
-        'xmr_usdt': 'last'
+        'close': 'last'
     }).reset_index()
 
     extra_points = pd.concat([df.loc[[ath]]] + [df.loc[[i]] for i in blocks if i not in df_resampled.index])
@@ -225,11 +225,11 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Price Chart with Dual Y-Axes
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
 st.markdown("### XMR & QUBIC Price (USD)")
-if not df.empty and 'qubic_usdt' in df.columns and 'xmr_usdt' in df.columns:
+if not df.empty and 'qubic_usdt' in df.columns and 'close' in df.columns:
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(go.Scatter(
         x=df['timestamp'],
-        y=df['xmr_usdt'],
+        y=df['close'],
         name='XMR/USDT',
         line=dict(color='#4ade80'),
         hovertemplate='%{x|%Y-%m-%d %H:%M}<br>XMR: $%{y:.2f}<extra></extra>'
