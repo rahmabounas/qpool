@@ -228,10 +228,9 @@ if not df_chart.empty:
     fig_prices = go.Figure()
     
     # Add XMR price
-    xmr_df = df_chart[df_chart['symbol'] == 'close']
     fig_prices.add_trace(go.Scatter(
-        x=xmr_df['timestamp'],
-        y=xmr_df['close'],
+        x=df_chart['timestamp_hour'],
+        y=df_chart['close'],
         mode='lines',
         name='XMR Price (USD)',
         line=dict(color='limegreen', width=2),
@@ -239,10 +238,9 @@ if not df_chart.empty:
     ))
     
     # Add QUBIC price (on secondary axis)
-    qubic_df = df_chart[df_chart['symbol'] == 'qubic_usdt']
     fig_prices.add_trace(go.Scatter(
-        x=qubic_df['timestamp'],
-        y=qubic_df['close'],
+        x=df_chart['timestamp_hour'],
+        y=df_chart['qubic_usdt'],
         mode='lines',
         name='QUBIC Price (USD)',
         line=dict(color='magenta', width=2),
