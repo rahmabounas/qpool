@@ -190,9 +190,9 @@ if not df.empty:
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)'
             )
-        c1 = st.columns(1)
-        c2 = st.columns(1)
-        c3 = st.columns(1)
+        c1, = st.columns(1)
+        c2, = st.columns(1)
+        c3, = st.columns(1)
         
         c1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']))
         c2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s")
