@@ -199,8 +199,7 @@ if not df.empty:
         c3.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})")
 
         st.plotly_chart(fig_spark, use_container_width=True)
-        </div>
-        """, unsafe_allow_html=True)
+
     
         st.markdown(f"""
         <div class="metric-card">
