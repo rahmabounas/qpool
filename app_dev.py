@@ -157,7 +157,7 @@ if not df.empty:
         c3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
 
     with col2:
-        d1, d2, d3 = st.columns(3, border=True)    
+        d1, d2, d3 = st.columns(3)    
         d1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
         d2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
         d3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
