@@ -166,72 +166,72 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
     with col2:
-
-# Hashrate Chart
-    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-    st.markdown("#### Hashrate Over Time")
-    if not df.empty:
-        df_chart = downsample(df)
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['pool_hashrate_mhs'],
-            name='Pool Hashrate (MH/s)',
-            line=dict(color='#4cc9f0'),
-            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Pool: %{y:.2f} MH/s<extra></extra>'
-        ))
-        fig.add_trace(go.Scatter(
-            x=df_chart['timestamp'],
-            y=df_chart['network_hashrate_ghs'],
-            name='Network Hashrate (GH/s)',
-            line=dict(color='#f72585', dash='dot'),
-            yaxis='y2',
-            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
-        ))
-        blocks = df_chart[df_chart['block_found']]
-        fig.add_trace(go.Scatter(
-            x=blocks['timestamp'],
-            y=blocks['pool_hashrate_mhs'],
-            mode='markers',
-            name='Block Found',
-            marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
-            hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
-        ))
-        # Calculate the time range for the last 24 hours
-        end_time = df_chart['timestamp'].max()
-        start_time = end_time - timedelta(hours=24)
-        fig.update_layout(
-            title='Pool and Network Hashrate',
-            xaxis=dict(
-                title='Time',
-                gridcolor='rgba(255,255,255,0.1)',
-                rangeslider=dict(visible=True, thickness=0.1),  # Add range slider
-                rangeselector=dict(
-                    buttons=list([
-                        dict(count=24, label="24h", step="hour", stepmode="backward"),
-                        dict(step="all", label="All")
-                    ]),
-                    bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
-                    font=dict(color='white'),  # White text for buttons
-                    activecolor='#4cc9f0'  # Match your theme’s accent color
+    
+        # Hashrate Chart
+        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+        st.markdown("#### Hashrate Over Time")
+        if not df.empty:
+            df_chart = downsample(df)
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['pool_hashrate_mhs'],
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='#4cc9f0'),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Pool: %{y:.2f} MH/s<extra></extra>'
+            ))
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['network_hashrate_ghs'],
+                name='Network Hashrate (GH/s)',
+                line=dict(color='#f72585', dash='dot'),
+                yaxis='y2',
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
+            ))
+            blocks = df_chart[df_chart['block_found']]
+            fig.add_trace(go.Scatter(
+                x=blocks['timestamp'],
+                y=blocks['pool_hashrate_mhs'],
+                mode='markers',
+                name='Block Found',
+                marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
+            ))
+            # Calculate the time range for the last 24 hours
+            end_time = df_chart['timestamp'].max()
+            start_time = end_time - timedelta(hours=24)
+            fig.update_layout(
+                title='Pool and Network Hashrate',
+                xaxis=dict(
+                    title='Time',
+                    gridcolor='rgba(255,255,255,0.1)',
+                    rangeslider=dict(visible=True, thickness=0.1),  # Add range slider
+                    rangeselector=dict(
+                        buttons=list([
+                            dict(count=24, label="24h", step="hour", stepmode="backward"),
+                            dict(step="all", label="All")
+                        ]),
+                        bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
+                        font=dict(color='white'),  # White text for buttons
+                        activecolor='#4cc9f0'  # Match your theme’s accent color
+                    ),
+                    range=[start_time, end_time],  # Default to last 24 hours
+                    type='date'
                 ),
-                range=[start_time, end_time],  # Default to last 24 hours
-                type='date'
-            ),
-            yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
-            yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
-            height=500,
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            showlegend=True,
-            legend=dict(x=0, y=1.1, orientation='h'),
-            hovermode='x unified'
-        )
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.info("No hashrate data available.")
-    st.markdown('</div>', unsafe_allow_html=True)
+                yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
+                yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
+                height=500,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                showlegend=True,
+                legend=dict(x=0, y=1.1, orientation='h'),
+                hovermode='x unified'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No hashrate data available.")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # Price Chart with Stacked Subplots
 st.markdown('<div class="chart-container">', unsafe_allow_html=True)
