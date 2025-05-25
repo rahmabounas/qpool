@@ -143,53 +143,18 @@ if not df.empty:
     col1, col2 = st.columns([1,3])
     with col1:
         
-        # Smoothed sparkline
-        filtered = six_hr[(six_hr['pool_hashrate_mhs'] > 0) & (six_hr['pool_hashrate_mhs'].notna())].copy()
-        filtered['smoothed'] = filtered['pool_hashrate_mhs'].rolling(window=240, min_periods=1).mean()
-    
-        if not filtered.empty:
-            fig_spark = go.Figure()
-            fig_spark.add_trace(go.Scatter(
-                x=filtered['timestamp'],
-                y=filtered['smoothed'],
-                mode='lines',
-                line=dict(color='#4cc9f0', width=2, shape='spline'),
-                hoverinfo='skip',
-                showlegend=False
-            ))
-            fig_spark.update_layout(
-                xaxis=dict(visible=False),
-                yaxis=dict(visible=False),
-                margin=dict(l=0, r=0, t=0, b=0),
-                height=80,
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)'
-            )
         c1, = st.columns(1)
         c2, = st.columns(1)
         c3, = st.columns(1)
         
-        c1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']))
-        c2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s")
-        c3.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})")
+        c1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']), border=True)
+        c2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s", border=True)
+        c3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
 
-        st.plotly_chart(fig_spark, use_container_width=True)
-
-    
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-label">NETWORK HASHRATE</div>
-            <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">Mean - 6h: {format_hashrate(six_hr['network_hashrate'].mean())}</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-label">BLOCKS FOUND</div>
-            <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
-            <div class="delta-value">Last block: {time_since_block}</div>
-        </div>
-        """, unsafe_allow_html=True)
     with col2:
-    
+        d1, d2, d3 = st.columns(3)    
+        d1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
+        d2.metric("BLOCKS FOUND", f``{int(latest['pool_blocks_found'])}``, border=True)
         # Hashrate Chart
         st.markdown("#### Qubic Monero Pool Dashboard")
         if not df.empty:
