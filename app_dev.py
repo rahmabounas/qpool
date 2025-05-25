@@ -26,32 +26,7 @@ st.markdown("""
         background-color: #1a252f !important;
         color: white !important;
     }
-    .metric-card {
-        background: rgba(32, 46, 60, 0.9);
-        border-radius: 12px;
-        padding: 1.2rem;
-        margin: 0.5rem;
-        border: 1px solid rgba(255,255,255,0.15);
-        color: white;
-        min-height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .metric-label { font-size: 1rem; font-weight: 600; color: #b0b8c1; }
-    .metric-value { font-size: 1.8rem; font-weight: bold; color: #4cc9f0; margin: 0.3rem 0; }
-    .delta-value { font-size: 0.85rem; color: #8b95a1; margin-top: auto; }
-    .block-indicator { color: #f72585; font-weight: bold; }
-    .price-positive { color: #4ade80; }
-    .price-negative { color: #f87171; }
-    .chart-container {
-        background: rgba(32, 46, 60, 0.8);
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 1rem 0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
+
     .stButton > button {
         background-color: #4cc9f0;
         color: white;
