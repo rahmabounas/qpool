@@ -174,6 +174,28 @@ if not df.empty:
             <div class="delta-value">Mean (6h): {mean_hash_6h:.2f} MH/s</div>
             <div class="delta-value">ATH: {format_hashrate(ath_val)} ({ath_time})</div>
         </div>
+        """, unsafe_allow_html=True)
+    
+        # Sparkline chart
+        if not six_hr.empty:
+            fig_spark = go.Figure()
+            fig_spark.add_trace(go.Scatter(
+                x=six_hr['timestamp'],
+                y=six_hr['pool_hashrate_mhs'],
+                mode='lines',
+                line=dict(color='#4cc9f0', width=2),
+                showlegend=False
+            ))
+            fig_spark.update_layout(
+                xaxis=dict(visible=False),
+                yaxis=dict(visible=False),
+                margin=dict(l=0, r=0, t=0, b=0),
+                height=80,
+                paper_bgcolor='rgba(0,0,0,0)',
+                plot_bgcolor='rgba(0,0,0,0)'
+            )
+            st.plotly_chart(fig_spark, use_container_width=True)
+        st.markdown(f"""
         <div class="metric-card">
             <div class="metric-label">NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
