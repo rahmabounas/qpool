@@ -178,7 +178,7 @@ if not df.empty:
     
         # Smoothed sparkline
         filtered = six_hr[(six_hr['pool_hashrate_mhs'] > 0) & (six_hr['pool_hashrate_mhs'].notna())].copy()
-        filtered['smoothed'] = filtered['pool_hashrate_mhs'].rolling(window=5, min_periods=1).mean()
+        filtered['smoothed'] = filtered['pool_hashrate_mhs'].rolling(window=15, min_periods=1).mean()
     
         if not filtered.empty:
             fig_spark = go.Figure()
