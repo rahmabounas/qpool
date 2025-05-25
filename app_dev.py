@@ -242,12 +242,12 @@ if not df.empty:
                 ),
                 yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
                 yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
-                height=500,
+                height=400,
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='white'),
                 showlegend=True,
-                legend=dict(x=0.4, y=0.1, orientation='h'),
+                legend=dict(x=0.4, y=-0.1, orientation='h'),
                 hovermode='x unified'
             )
             st.plotly_chart(fig, use_container_width=True)
