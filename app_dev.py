@@ -176,14 +176,18 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
     
-        # Sparkline chart
-        if not six_hr.empty:
+        # Smoothed sparkline
+        filtered = six_hr[(six_hr['pool_hashrate_mhs'] > 0) & (six_hr['pool_hashrate_mhs'].notna())].copy()
+        filtered['smoothed'] = filtered['pool_hashrate_mhs'].rolling(window=5, min_periods=1).mean()
+    
+        if not filtered.empty:
             fig_spark = go.Figure()
             fig_spark.add_trace(go.Scatter(
-                x=six_hr['timestamp'],
-                y=six_hr['pool_hashrate_mhs'],
+                x=filtered['timestamp'],
+                y=filtered['smoothed'],
                 mode='lines',
-                line=dict(color='#4cc9f0', width=2),
+                line=dict(color='#4cc9f0', width=2, shape='spline'),
+                hoverinfo='skip',
                 showlegend=False
             ))
             fig_spark.update_layout(
@@ -195,6 +199,7 @@ if not df.empty:
                 plot_bgcolor='rgba(0,0,0,0)'
             )
             st.plotly_chart(fig_spark, use_container_width=True)
+
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-label">NETWORK HASHRATE</div>
