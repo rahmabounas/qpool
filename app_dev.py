@@ -195,8 +195,8 @@ if not df.empty:
         c3 = st.columns(1)
         
         c1.metric("POOL HASHRATE", {format_hashrate(latest['pool_hashrate'])})
-        c2.metric("Mean (6h)", f``{mean_hash_6h:.2f} MH/s``})
-        c3.metric("ATH", f``{format_hashrate(ath_val)} ({ath_time}))
+        c2.metric("Mean (6h)", f``{mean_hash_6h:.2f}, " MH/s"``})
+        c3.metric("ATH", f``{format_hashrate(ath_val)}, ({ath_time})``)
         st.plotly_chart(fig_spark, use_container_width=True)
         </div>
         """, unsafe_allow_html=True)
