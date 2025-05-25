@@ -23,21 +23,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     
-    div[data-testid="stVerticalBlock"] {
-       background-color: rgba(28, 131, 225, 0.1);
-       border: 1px solid rgba(28, 131, 225, 0.1);
-       padding: 5% 5% 5% 10%;
-       border-radius: 5px;
-       color: rgb(30, 103, 119);
-       overflow-wrap: break-word;
-    }
-    
-    /* breakline for metric text         */
-    div[data-testid="stVerticalBlock"] > label[data-testid="stMetricLabel"] > div {
-       overflow-wrap: break-word;
-       white-space: break-spaces;
-       color: red;
-    }
+
 
     body, .main, .block-container {
         background-color: #1a252f !important;
