@@ -154,7 +154,8 @@ if not df.empty:
     with col2:
         d1, d2, d3 = st.columns(3)    
         d1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
-        d2.metric("BLOCKS FOUND", f``{int(latest['pool_blocks_found'])}``, border=True)
+        d2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
+        d3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
         # Hashrate Chart
         st.markdown("#### Qubic Monero Pool Dashboard")
         if not df.empty:
