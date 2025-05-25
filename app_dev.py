@@ -23,7 +23,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     
-    div[data-testid="metric-container"] {
+    div[data-testid="stVerticalBlock"] {
        background-color: rgba(28, 131, 225, 0.1);
        border: 1px solid rgba(28, 131, 225, 0.1);
        padding: 5% 5% 5% 10%;
@@ -33,7 +33,7 @@ st.markdown("""
     }
     
     /* breakline for metric text         */
-    div[data-testid="metric-container"] > label[data-testid="stMetricLabel"] > div {
+    div[data-testid="stVerticalBlock"] > label[data-testid="stMetricLabel"] > div {
        overflow-wrap: break-word;
        white-space: break-spaces;
        color: red;
