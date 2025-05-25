@@ -202,13 +202,11 @@ if not df.empty:
         </div>
         """, unsafe_allow_html=True)
     
-
-
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-label">NETWORK HASHRATE</div>
             <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            <div class="delta-value">Mean (6h): {format_hashrate(six_hr['network_hashrate'].mean())}</div>
+            <div class="delta-value">Mean - 6h: {format_hashrate(six_hr['network_hashrate'].mean())}</div>
         </div>
         <div class="metric-card">
             <div class="metric-label">BLOCKS FOUND</div>
