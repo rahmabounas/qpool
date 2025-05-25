@@ -159,7 +159,7 @@ if not df.empty:
     last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
     time_since_block = format_timespan(latest['timestamp'] - last_block) if last_block else "No block"
 
-    col1, col2 = st.columns([1,3])
+    col1, col2 = st.columns([1,3], border=True)
     with col1:
         
         c1, = st.columns(1)
@@ -171,7 +171,7 @@ if not df.empty:
         c3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
 
     with col2:
-        d1, d2, d3 = st.columns(3)    
+        d1, d2, d3 = st.columns(3, border=True)    
         d1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
         d2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
         d3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
