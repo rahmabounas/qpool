@@ -155,9 +155,6 @@ def downsample(df, interval='5T'):
 # Load data
 df = load_data()
 
-# Dashboard Layout
-st.markdown("## Qubic Monero Pool Dashboard")
-
 # Metric Cards (Top Row)
 if not df.empty:
     latest = df.iloc[-1]
@@ -191,6 +188,7 @@ if not df.empty:
     with col2:
     
         # Hashrate Chart
+        st.markdown("#### Qubic Monero Pool Dashboard")
         if not df.empty:
             df_chart = downsample(df)
             fig = go.Figure()
