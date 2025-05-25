@@ -168,8 +168,6 @@ if not df.empty:
     with col2:
     
         # Hashrate Chart
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-        st.markdown("#### Hashrate Over Time")
         if not df.empty:
             df_chart = downsample(df)
             fig = go.Figure()
