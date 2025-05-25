@@ -167,15 +167,6 @@ if not df.empty:
 
     col1, col2 = st.columns([1,3])
     with col1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-label">POOL HASHRATE</div>
-            <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            <div class="delta-value">Mean (6h): {mean_hash_6h:.2f} MH/s</div>
-            <div class="delta-value">ATH: {format_hashrate(ath_val)} ({ath_time})</div>
-        </div>
-        """, unsafe_allow_html=True)
-    
         # Smoothed sparkline
         filtered = six_hr[(six_hr['pool_hashrate_mhs'] > 0) & (six_hr['pool_hashrate_mhs'].notna())].copy()
         filtered['smoothed'] = filtered['pool_hashrate_mhs'].rolling(window=240, min_periods=1).mean()
@@ -198,7 +189,18 @@ if not df.empty:
                 paper_bgcolor='rgba(0,0,0,0)',
                 plot_bgcolor='rgba(0,0,0,0)'
             )
-            st.plotly_chart(fig_spark, use_container_width=True)
+           
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">POOL HASHRATE</div>
+            <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+            <div class="delta-value">Mean (6h): {mean_hash_6h:.2f} MH/s</div>
+            <div class="delta-value">ATH: {format_hashrate(ath_val)} ({ath_time})</div>
+             st.plotly_chart(fig_spark, use_container_width=True)
+        </div>
+        """, unsafe_allow_html=True)
+    
+
 
         st.markdown(f"""
         <div class="metric-card">
