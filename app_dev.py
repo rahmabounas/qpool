@@ -190,7 +190,6 @@ if not df.empty:
             end_time = df_chart['timestamp'].max()
             start_time = end_time - timedelta(hours=24)
             fig.update_layout(
-                title='Pool and Network Hashrate',
                 xaxis=dict(
                     title='Time',
                     gridcolor='rgba(255,255,255,0.1)',
@@ -209,7 +208,7 @@ if not df.empty:
                 ),
                 yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
                 yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
-                height=400,
+                height=350,
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
                 font=dict(color='white'),
@@ -277,7 +276,7 @@ if not df_chart.empty:
             x=1
         ),
         margin=dict(l=40, r=40, t=40, b=40),
-        height=450,
+        height=350,
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(color='white')
