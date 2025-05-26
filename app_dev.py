@@ -209,7 +209,7 @@ if not df.empty:
                 </div>
                 """, unsafe_allow_html=True)
             with col2c:
-            st.markdown(f"""
+                st.markdown(f"""
                 <div class="metric-card">
                     <div class="metric-title">Network Hashrate</div>
                     <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
