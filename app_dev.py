@@ -316,88 +316,71 @@ if not df.empty:
                 st.info("No hashrate data available.")
             st.markdown('</div>', unsafe_allow_html=True)
         with tab2:
-            tol1, tol2 = st.columns([1,3])
-            with tol1:
-            
-                with tol1:
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-title">QUBIC/USDT</div>
-                        <div class="metric-value">${df_chart['qubic_usdt'].iloc[-1]:.9f}</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-title">XMR/USDT</div>
-                        <div class="metric-value">${df_chart['close'].iloc[-1]:.2f}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-
-        
-                with tol2:
-                    # Hashrate Chart
-                    # Price Chart with Stacked Subplots
-                    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-                    if not df_chart.empty:
-                        # Create price chart
-                        fig_prices = go.Figure()
-                        
-                        # Add XMR price
-                        fig_prices.add_trace(go.Scatter(
-                            x=df_chart['timestamp'],
-                            y=df_chart['close'],
-                            mode='lines',
-                            name='XMR Price (USD)',
-                            line=dict(color='limegreen', width=2),
-                            yaxis='y1'
-                        ))
-                        
-                        # Add QUBIC price (on secondary axis)
-                        fig_prices.add_trace(go.Scatter(
-                            x=df_chart['timestamp'],
-                            y=df_chart['qubic_usdt'],
-                            mode='lines',
-                            name='QUBIC Price (USD)',
-                            line=dict(color='magenta', width=2),
-                            yaxis='y2'
-                        ))
-                        
-                        # Calculate the time range for the last 24 hours
-                        end_time = df_chart['timestamp'].max()
-                        start_time = end_time - timedelta(hours=24)
-                        
-                        # Layout with dual y-axes, range slider, and range selector
-                        fig_prices.update_layout(
-                            title='XMR & QUBIC Prices (24h)',
-                            yaxis=dict(
-                                title='XMR Price (USD)',
-                                tickformat='$.2f',
-                                side='left',
-                                showgrid=False
-                            ),
-                            yaxis2=dict(
-                                title='QUBIC Price (USD)',
-                                tickformat='$.9f',
-                                overlaying='y',
-                                side='right',
-                                showgrid=False
-                            ),
-                            legend=dict(
-                                orientation='h',
-                                yanchor='bottom',
-                                y=1.02,
-                                xanchor='right',
-                                x=1
-                            ),
-                            margin=dict(l=40, r=40, t=40, b=40),
-                            height=350,
-                            plot_bgcolor='rgba(0,0,0,0)',
-                            paper_bgcolor='rgba(0,0,0,0)',
-                            font=dict(color='white')
-                        )
-                        
-                        st.plotly_chart(fig_prices, use_container_width=True)
-                    else:
-                        st.warning("No price data available to display.")
-                    st.markdown('</div>', unsafe_allow_html=True)
+            # Hashrate Chart
+            # Price Chart with Stacked Subplots
+            st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+            if not df_chart.empty:
+                # Create price chart
+                fig_prices = go.Figure()
+                
+                # Add XMR price
+                fig_prices.add_trace(go.Scatter(
+                    x=df_chart['timestamp'],
+                    y=df_chart['close'],
+                    mode='lines',
+                    name='XMR Price (USD)',
+                    line=dict(color='limegreen', width=2),
+                    yaxis='y1'
+                ))
+                
+                # Add QUBIC price (on secondary axis)
+                fig_prices.add_trace(go.Scatter(
+                    x=df_chart['timestamp'],
+                    y=df_chart['qubic_usdt'],
+                    mode='lines',
+                    name='QUBIC Price (USD)',
+                    line=dict(color='magenta', width=2),
+                    yaxis='y2'
+                ))
+                
+                # Calculate the time range for the last 24 hours
+                end_time = df_chart['timestamp'].max()
+                start_time = end_time - timedelta(hours=24)
+                
+                # Layout with dual y-axes, range slider, and range selector
+                fig_prices.update_layout(
+                    title='XMR & QUBIC Prices (24h)',
+                    yaxis=dict(
+                        title='XMR Price (USD)',
+                        tickformat='$.2f',
+                        side='left',
+                        showgrid=False
+                    ),
+                    yaxis2=dict(
+                        title='QUBIC Price (USD)',
+                        tickformat='$.9f',
+                        overlaying='y',
+                        side='right',
+                        showgrid=False
+                    ),
+                    legend=dict(
+                        orientation='h',
+                        yanchor='bottom',
+                        y=1.02,
+                        xanchor='right',
+                        x=1
+                    ),
+                    margin=dict(l=40, r=40, t=40, b=40),
+                    height=350,
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    font=dict(color='white')
+                )
+                
+                st.plotly_chart(fig_prices, use_container_width=True)
+            else:
+                st.warning("No price data available to display.")
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # Manual Refresh Button
 if st.button("🔄 Refresh Data", key="refresh"):
