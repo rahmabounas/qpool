@@ -205,17 +205,17 @@ if not df.empty:
                     xaxis=dict(
                         title='Time',
                         gridcolor='rgba(255,255,255,0.1)',
-                        rangeslider=dict(visible=True, thickness=0.1),  # Add range slider
+                        range=[start_time, end_time],  # This is what limits it to last 24h
+                        rangeslider=dict(visible=True, thickness=0.1),
                         rangeselector=dict(
                             buttons=list([
                                 dict(count=24, label="24h", step="hour", stepmode="backward"),
                                 dict(step="all", label="All")
                             ]),
-                            bgcolor='rgba(32, 46, 60, 0.9)',  # Match dark theme
-                            font=dict(color='white'),  # White text for buttons
-                            activecolor='#4cc9f0'  # Match your theme’s accent color
+                            bgcolor='rgba(32, 46, 60, 0.9)',
+                            font=dict(color='white'),
+                            activecolor='#4cc9f0'
                         ),
-                        range=[start_time, end_time],  # Default to last 24 hours
                         type='date'
                     ),
                     yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
