@@ -48,7 +48,7 @@ st.markdown("""
       /* Remove blank space at top and bottom */ 
     .block-container {
        padding-top: 3rem;
-       padding-bottom: 1.5rem;
+       padding-bottom: 2rem;
     }
    
    /* Remove blank space at the center canvas */ 
