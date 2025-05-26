@@ -163,7 +163,13 @@ def downsample(df, interval='5T'):
 
     extra_points = pd.concat([df.loc[[ath]]] + [df.loc[[i]] for i in blocks if i not in df_resampled.index])
     df_combined = pd.concat([df_resampled, extra_points]).sort_values('timestamp').drop_duplicates('timestamp')
+    
+    # Fill forward any missing prices
+    df_combined[['qubic_usdt', 'close']] = df_combined[['qubic_usdt', 'close']].ffill()
+    
+    # Recalculate block_found based on pool_blocks_found diff
     df_combined['block_found'] = df_combined['pool_blocks_found'].diff().fillna(0) > 0
+
     return df_combined
 
 # Load data
