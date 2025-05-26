@@ -205,117 +205,117 @@ if not df.empty:
     
     
     # tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
-    tab1 = st.tabs(["Pool Stats"])
-    with tab1: 
-        col1, col2 = st.columns([1,3])
-        with col1:
+    # tab1 = st.tabs(["Pool Stats"])
+    # with tab1: 
+    col1, col2 = st.columns([1,3])
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-title">ATH ({ath_time})</div>
+            <div class="metric-value">{format_hashrate(ath_val)}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Total Blocks Found</div>
+            <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Blocks in Last 24H</div>
+            <div class="metric-value">{int(blocks_24h_count)}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">Avg Block Interval (24h)</div>
+            <div class="metric-value">
+                {f"{mean_block_time_min:.1f} min" if mean_block_time_min else "N/A"}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        col2a, col2b, col2c = st.columns(3)
+        with col2a:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-title">ATH ({ath_time})</div>
-                <div class="metric-value">{format_hashrate(ath_val)}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Total Blocks Found</div>
-                <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Blocks in Last 24H</div>
-                <div class="metric-value">{int(blocks_24h_count)}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Avg Block Interval (24h)</div>
-                <div class="metric-value">
-                    {f"{mean_block_time_min:.1f} min" if mean_block_time_min else "N/A"}
-                </div>
+                <div class="metric-title">Pool Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
             </div>
             """, unsafe_allow_html=True)
-        
-        with col2:
-            col2a, col2b, col2c = st.columns(3)
-            with col2a:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">Pool Hashrate</div>
-                    <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            with col2b:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">Mean (6h)</div>
-                    <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
-                </div>
-                """, unsafe_allow_html=True)
-            with col2c:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">Network Hashrate</div>
-                    <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            # Hashrate Chart
-            if not df.empty:
-                df_chart = downsample(df)
-                fig = go.Figure()
-                fig.add_trace(go.Scatter(
-                    x=df_chart['timestamp'],
-                    y=df_chart['pool_hashrate_mhs'],
-                    name='Pool Hashrate (MH/s)',
-                    line=dict(color='#4cc9f0'),
-                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Pool: %{y:.2f} MH/s<extra></extra>'
-                ))
-                fig.add_trace(go.Scatter(
-                    x=df_chart['timestamp'],
-                    y=df_chart['network_hashrate_ghs'],
-                    name='Network Hashrate (GH/s)',
-                    line=dict(color='#f72585', dash='dot'),
-                    yaxis='y2',
-                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
-                ))
-                blocks = df_chart[df_chart['block_found']]
-                fig.add_trace(go.Scatter(
-                    x=blocks['timestamp'],
-                    y=blocks['pool_hashrate_mhs'],
-                    mode='markers',
-                    name='Block Found',
-                    marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
-                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
-                ))
-                # Calculate the time range for the last 24 hours
-                end_time = df_chart['timestamp'].max()
-                start_time = end_time - timedelta(hours=24)
-                fig.update_layout(
-                    xaxis=dict(
-                        title='Time',
-                        gridcolor='rgba(255,255,255,0.1)',
-                        range=[start_time, end_time],  # This is what limits it to last 24h
-                        rangeslider=dict(visible=True, thickness=0.1),
-                        rangeselector=dict(
-                            buttons=list([
-                                dict(count=24, label="24h", step="hour", stepmode="backward"),
-                                dict(step="all", label="All")
-                            ]),
-                            bgcolor='rgba(32, 46, 60, 0.9)',
-                            font=dict(color='white'),
-                            activecolor='#4cc9f0'
-                        ),
-                        type='date'
+        with col2b:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Mean (6h)</div>
+                <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2c:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Network Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        # Hashrate Chart
+        if not df.empty:
+            df_chart = downsample(df)
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['pool_hashrate_mhs'],
+                name='Pool Hashrate (MH/s)',
+                line=dict(color='#4cc9f0'),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Pool: %{y:.2f} MH/s<extra></extra>'
+            ))
+            fig.add_trace(go.Scatter(
+                x=df_chart['timestamp'],
+                y=df_chart['network_hashrate_ghs'],
+                name='Network Hashrate (GH/s)',
+                line=dict(color='#f72585', dash='dot'),
+                yaxis='y2',
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
+            ))
+            blocks = df_chart[df_chart['block_found']]
+            fig.add_trace(go.Scatter(
+                x=blocks['timestamp'],
+                y=blocks['pool_hashrate_mhs'],
+                mode='markers',
+                name='Block Found',
+                marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
+            ))
+            # Calculate the time range for the last 24 hours
+            end_time = df_chart['timestamp'].max()
+            start_time = end_time - timedelta(hours=24)
+            fig.update_layout(
+                xaxis=dict(
+                    title='Time',
+                    gridcolor='rgba(255,255,255,0.1)',
+                    range=[start_time, end_time],  # This is what limits it to last 24h
+                    rangeslider=dict(visible=True, thickness=0.1),
+                    rangeselector=dict(
+                        buttons=list([
+                            dict(count=24, label="24h", step="hour", stepmode="backward"),
+                            dict(step="all", label="All")
+                        ]),
+                        bgcolor='rgba(32, 46, 60, 0.9)',
+                        font=dict(color='white'),
+                        activecolor='#4cc9f0'
                     ),
-                    yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
-                    yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
-                    margin=dict(t=5, b=10, l=10, r=10),  # Top, bottom, left, right
-                    height=330,
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font=dict(color='white'),
-                    showlegend=True,
-                    legend=dict(x=0.5, y=1, orientation='h'),
-                    hovermode='x unified'
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No hashrate data available.")
-            st.markdown('</div>', unsafe_allow_html=True)
+                    type='date'
+                ),
+                yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
+                yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
+                margin=dict(t=5, b=10, l=10, r=10),  # Top, bottom, left, right
+                height=330,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                showlegend=True,
+                legend=dict(x=0.5, y=1, orientation='h'),
+                hovermode='x unified'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No hashrate data available.")
+        st.markdown('</div>', unsafe_allow_html=True)
         
 # Manual Refresh Button
 if st.button("🔄 Refresh Data", key="refresh"):
