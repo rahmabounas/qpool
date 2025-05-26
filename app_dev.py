@@ -152,17 +152,17 @@ if not df.empty:
             c1, = st.columns(1)
             c2, = st.columns(1)
             c3, = st.columns(1)
-            
-            c1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']), border=True)
-            c2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s", border=True)
-            c3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
+            c1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
+            c2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
+            c3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
+
     
         with col2:
     
-                d1, d2, d3 = st.columns(3)    
-                d1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
-                d2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
-                d3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
+            d1, d2, d3 = st.columns(3)    
+            d1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']), border=True)
+            d2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s", border=True)
+            d3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
                 # Hashrate Chart
                 if not df.empty:
                     df_chart = downsample(df)
