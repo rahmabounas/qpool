@@ -302,7 +302,7 @@ if not df.empty:
                     paper_bgcolor='rgba(0,0,0,0)',
                     font=dict(color='white'),
                     showlegend=True,
-                    legend=dict(x=0.55, y=1, orientation='h'),
+                    legend=dict(x=0.5, y=1, orientation='h'),
                     hovermode='x unified'
                 )
                 st.plotly_chart(fig, use_container_width=True)
