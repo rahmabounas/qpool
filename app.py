@@ -24,7 +24,7 @@ st.markdown("""
 <style>
     
     .element-container:has(.js-plotly-plot) {
-        padding-bottom: 5 !important;
+        padding-bottom: 10 !important;
         margin-bottom: -10px;
     }
 
@@ -34,7 +34,7 @@ st.markdown("""
     }
 
     .stButton > button {
-        background-color: #4cc9f0;
+        background-color: #26303A;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
