@@ -88,6 +88,18 @@ st.markdown("""
         font-weight: bold;
         color: white;
     }
+    /* Style for streamlit tab labels */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #999;  /* Inactive */
+        font-weight: bold;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #fff !important;  /* Active */
+        border-bottom: 2px solid #4cc9f0 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -172,7 +184,14 @@ if not df.empty:
     # Count blocks in the last 24 hours
     blocks_last_24h = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=24))]
     blocks_24h_count = blocks_last_24h['block_found'].sum()
-    blocks_in_24h = blocks_24h_count / 1440
+    # Calculate mean time between blocks (in minutes) for the last 24h
+    block_times = blocks_last_24h[blocks_last_24h['block_found']]['timestamp']
+    if len(block_times) > 1:
+        time_deltas = block_times.diff().dropna()
+        mean_block_time_min = time_deltas.mean().total_seconds() / 60
+    else:
+        mean_block_time_min = None
+    
     
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
     with tab1: 
@@ -192,8 +211,10 @@ if not df.empty:
                 <div class="metric-value">{int(blocks_24h_count)}</div>
             </div>
             <div class="metric-card">
-                <div class="metric-title">Average time to mine a block</div>
-                <div class="metric-value">{int(blocks_in_24h)}</div>
+                <div class="metric-title">Avg Block Interval (24h)</div>
+                <div class="metric-value">
+                    {f"{mean_block_time_min:.1f} min" if mean_block_time_min else "N/A"}
+                </div>
             </div>
             """, unsafe_allow_html=True)
         
