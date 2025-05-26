@@ -202,7 +202,16 @@ if not df.empty:
         mean_block_time_min = time_deltas.mean().total_seconds() / 60
     else:
         mean_block_time_min = None
+
+    # Get max blocks found per epoch
+    epoch_blocks = df.groupby('qubic_epoch')['pool_blocks_found'].max()
     
+    # Calculate number of blocks per epoch by diff
+    blocks_per_epoch = epoch_blocks.diff().fillna(epoch_blocks.iloc[0]).astype(int)
+    
+    # Get last two epochs
+    current_epoch = epoch_blocks.index[-1]
+    previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
     
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
     with tab1: 
@@ -217,10 +226,23 @@ if not df.empty:
                 <div class="metric-title">Total Blocks Found</div>
                 <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
             </div>
-            <div class="metric-card">
-                <div class="metric-title">Blocks in Last 24H</div>
-                <div class="metric-value">{int(blocks_24h_count)}</div>
-            </div>
+            """, unsafe_allow_html=True)
+            col1a, col1b = st.columns(2)
+                with col1a: 
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">Current epoch ({current_epoch})</div>
+                        <div class="metric-value">{blocks_per_epoch.loc[current_epoch]}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col1b: 
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">Previous epoch ({previous_epoch}) </div>
+                        <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            st.markdown(f"""
             <div class="metric-card">
                 <div class="metric-title">Avg Block Interval (24h)</div>
                 <div class="metric-value">
