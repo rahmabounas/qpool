@@ -490,7 +490,7 @@ if not df.empty:
             st.markdown("### 📋 Recent Burn Transactions")
             df_burn.columns=['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']
             st.dataframe(
-                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('timestamp', ascending=False),
+                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('Timestamp', ascending=False),
                 use_container_width=True,
                 hide_index=True
             )
