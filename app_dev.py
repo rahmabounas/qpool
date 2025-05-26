@@ -67,6 +67,27 @@ st.markdown("""
        background: rgb(255 255 255);
        border-radius: 5px;
        }
+
+    .metric-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    
+    .metric-title {
+        font-size: 0.85rem;
+        color: #a0aec0;
+        margin-bottom: 0.25rem;
+    }
+    
+    .metric-value {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: white;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -156,20 +177,36 @@ if not df.empty:
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
-            
-            c1, = st.columns(1)
-            c2, = st.columns(1)
-            c3, = st.columns(1)
-            c1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
-            c2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
-            c3.metric("BLOCKS IN LAST 24H", int(blocks_24h_count), border=True)
-
-    
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">ATH</div>
+                <div class="metric-value">{format_hashrate(ath_val)} ({ath_time})</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Blocks Found</div>
+                <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Blocks in Last 24H</div>
+                <div class="metric-value">{int(blocks_24h_count)}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
         with col2:
-            d1, d2, d3 = st.columns(3)    
-            d1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']), border=True)
-            d2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s", border=True)
-            d3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-title">Pool Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Mean (6h)</div>
+                <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Network Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
             # Hashrate Chart
             if not df.empty:
                 df_chart = downsample(df)
@@ -237,11 +274,18 @@ if not df.empty:
             tol1, tol2 = st.columns([1,3])
             with tol1:
             
-                t1, = st.columns(1)
-                t2, = st.columns(1)
-                
-                t1.metric("QUBIC/USDT", f"${df_chart['qubic_usdt'].iloc[-1]:.9f}", border=True)
-                t2.metric("XMR/USDT", f"${df_chart['close'].iloc[-1]:.2f}", border=True)
+                with tol1:
+                    st.markdown(f"""
+                    <div class="metric-card">
+                        <div class="metric-title">QUBIC/USDT</div>
+                        <div class="metric-value">${df_chart['qubic_usdt'].iloc[-1]:.9f}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">XMR/USDT</div>
+                        <div class="metric-value">${df_chart['close'].iloc[-1]:.2f}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
         
                 with tol2:
                     # Hashrate Chart
