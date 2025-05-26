@@ -23,7 +23,10 @@ st.set_page_config(
 st.markdown("""
 <style>
     
-
+    .element-container:has(.js-plotly-plot) {
+        padding-bottom: 0 !important;
+        margin-bottom: -20px;
+    }
 
     body, .main, .block-container {
         background-color: #1a252f !important;
