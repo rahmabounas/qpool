@@ -197,12 +197,8 @@ if not df.empty:
             <div class="metric-card">
                 <div class="metric-title">Pool Hashrate</div>
                 <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            </div>
-            <div class="metric-card">
                 <div class="metric-title">Mean (6h)</div>
                 <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
-            </div>
-            <div class="metric-card">
                 <div class="metric-title">Network Hashrate</div>
                 <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
             </div>
