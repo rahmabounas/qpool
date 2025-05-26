@@ -172,6 +172,7 @@ if not df.empty:
     # Count blocks in the last 24 hours
     blocks_last_24h = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=24))]
     blocks_24h_count = blocks_last_24h['block_found'].sum()
+    blocks_in_24h = blocks_24h_count / 1440
     
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
     with tab1: 
@@ -179,8 +180,8 @@ if not df.empty:
         with col1:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-title">ATH</div>
-                <div class="metric-value">{format_hashrate(ath_val)} ({ath_time})</div>
+                <div class="metric-title">ATH ({ath_time})</div>
+                <div class="metric-value">{format_hashrate(ath_val)}</div>
             </div>
             <div class="metric-card">
                 <div class="metric-title">Total Blocks Found</div>
@@ -189,6 +190,10 @@ if not df.empty:
             <div class="metric-card">
                 <div class="metric-title">Blocks in Last 24H</div>
                 <div class="metric-value">{int(blocks_24h_count)}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Average time to mine a block</div>
+                <div class="metric-value">{int(blocks_in_24h)}</div>
             </div>
             """, unsafe_allow_html=True)
         
