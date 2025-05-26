@@ -25,7 +25,7 @@ st.markdown("""
     
     .element-container:has(.js-plotly-plot) {
         padding-bottom: 0 !important;
-        margin-bottom: -20px;
+        margin-bottom: -10px;
     }
 
     body, .main, .block-container {
