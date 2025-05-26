@@ -231,8 +231,8 @@ if not df.empty:
                 t1, = st.columns(1)
                 t2, = st.columns(1)
                 
-                t1.metric("QUBIC/USDT", df_chart['qubic_usdt'].iloc[-1], border=True)
-                t2.metric("XMR/USDT", df_chart['close'].iloc[-1], border=True)
+                t1.metric("QUBIC/USDT", f"${df_chart['qubic_usdt'].iloc[-1]:.9f}", border=True)
+                t2.metric("XMR/USDT", f"${df_chart['close'].iloc[-1]:.2f}", border=True)
         
                 with tol2:
             
