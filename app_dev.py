@@ -488,8 +488,9 @@ if not df.empty:
             st.plotly_chart(fig_burn, use_container_width=True)
     
             st.markdown("### 📋 Recent Burn Transactions")
+            df_burn.rename(columns={'timestamp': 'Timestamp', 'tx': 'TX', 'qubic_amount': 'QUBIC (amount)', 'usdt_value': 'Value ($USDT)'}, inplace=True).
             st.dataframe(
-                df_burn[['timestamp', 'tx', 'qubic_amount', 'usdt_value']].sort_values('timestamp', ascending=False),
+                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('timestamp', ascending=False),
                 use_container_width=True,
                 hide_index=True
             )
