@@ -244,15 +244,9 @@ if not df.empty:
                 t2.metric("XMR/USDT", f"${df_chart['close'].iloc[-1]:.2f}", border=True)
         
                 with tol2:
-            
-                    u1, u2, u3 = st.columns(3)    
-                    u1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
-                    u2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
-                    u3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
                     # Hashrate Chart
                     # Price Chart with Stacked Subplots
                     st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-                    st.markdown("### XMR & QUBIC Price (USD)")
                     if not df_chart.empty:
                         # Create price chart
                         fig_prices = go.Figure()
