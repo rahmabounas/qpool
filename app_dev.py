@@ -147,6 +147,11 @@ if not df.empty:
     ath_time = df[df['pool_hashrate'] == ath_val]['timestamp'].iloc[0].strftime('%Y-%m-%d') if not df.empty else "N/A"
     last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
     time_since_block = format_timespan(latest['timestamp'] - last_block) if last_block else "No block"
+    
+    # Count blocks in the last 24 hours
+    blocks_last_24h = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=24))]
+    blocks_24h_count = blocks_last_24h['block_found'].sum()
+    
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
     with tab1: 
         col1, col2 = st.columns([1,3], border=True)
@@ -157,7 +162,7 @@ if not df.empty:
             c3, = st.columns(1)
             c1.metric("ATH", f"{format_hashrate(ath_val)} ({ath_time})", border=True)
             c2.metric("TOTAL BLOCKS FOUND", f"{int(latest['pool_blocks_found'])}", border=True)
-            c3.metric("BLOCKS PER LAST 24H", "Placeholder", border=True)
+            c3.metric("BLOCKS IN LAST 24H", int(blocks_24h_count), border=True)
 
     
         with col2:
