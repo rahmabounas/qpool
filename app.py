@@ -171,6 +171,18 @@ def downsample(df, interval='5T'):
     df_combined['block_found'] = df_combined['pool_blocks_found'].diff().fillna(0) > 0
 
     return df_combined
+    
+@st.cache_data(ttl=REFRESH_INTERVAL, show_spinner="Loading burn data...")
+def load_burn_data():
+    try:
+        df = pd.read_csv("http://66.179.92.83/data/qubic_burns.csv")
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df['qubic_amount'] = pd.to_numeric(df['qubic_amount'], errors='coerce')
+        df['usdt_value'] = pd.to_numeric(df['usdt_value'], errors='coerce')
+        return df.sort_values('timestamp')
+    except Exception as e:
+        st.error(f"Failed to load burn data: {str(e)}")
+        return pd.DataFrame()
 
 # Load data
 df = load_data()
@@ -213,7 +225,7 @@ if not df.empty:
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
     
-    tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
+    tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
@@ -420,7 +432,71 @@ if not df.empty:
                         st.plotly_chart(fig_prices, use_container_width=True)
                     else:
                         st.warning("No price data available to display.")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)                    
+    with tab3:
+        df_burn = load_burn_data()
+        if not df_burn.empty:
+            total_qubic_burned = df_burn['qubic_amount'].sum()
+            total_usdt_burned = df_burn['usdt_value'].sum()
+            last_burn = df_burn.iloc[-1]
+            
+            st.markdown("### 🔥 Token Burn Summary")
+            colb1, colb2, colb3 = st.columns(3)
+            with colb1:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Total QUBIC Burned</div>
+                    <div class="metric-value">{total_qubic_burned:,.0f}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with colb2:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">USD Equivalent Burned</div>
+                    <div class="metric-value">${total_usdt_burned:,.0f}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with colb3:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Last Burn</div>
+                    <div class="metric-value">{last_burn['timestamp'].strftime('%Y-%m-%d')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+    
+            st.markdown("### 📈 Burn History (Last 30 Days)")
+            recent_burns = df_burn[df_burn['timestamp'] > (datetime.now() - timedelta(days=30))]
+    
+            fig_burn = go.Figure()
+            fig_burn.add_trace(go.Bar(
+                x=recent_burns['timestamp'],
+                y=recent_burns['qubic_amount'],
+                name='QUBIC Burned',
+                marker_color='crimson',
+                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>%{y:,.0f} QUBIC<extra></extra>'
+            ))
+    
+            fig_burn.update_layout(
+                xaxis_title="Date",
+                yaxis_title="QUBIC Burned",
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                margin=dict(l=20, r=20, t=30, b=30),
+                height=300
+            )
+            st.plotly_chart(fig_burn, use_container_width=True)
+    
+            st.markdown("### 📋 Recent Burn Transactions")
+            df_burn.columns=['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']
+            st.dataframe(
+                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('Timestamp', ascending=False),
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.warning("No token burn data available.")
+
 
 # Manual Refresh Button
 if st.button("🔄 Refresh Data", key="refresh"):
