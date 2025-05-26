@@ -297,7 +297,7 @@ if not df.empty:
                     yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
                     yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
                     margin=dict(t=5, b=10, l=10, r=10),  # Top, bottom, left, right
-                    height=350,
+                    height=400,
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     font=dict(color='white'),
