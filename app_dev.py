@@ -195,26 +195,26 @@ if not df.empty:
         with col2:
             col2a, col2b, col2c = st.columns(3)
             with col2a:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-title">Pool Hashrate</div>
-                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Pool Hashrate</div>
+                    <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col2b:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-title">Mean (6h)</div>
-                <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Mean (6h)</div>
+                    <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
+                </div>
+                """, unsafe_allow_html=True)
             with col2c:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-title">Network Hashrate</div>
-                <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
-            </div>
-            """, unsafe_allow_html=True)
+                <div class="metric-card">
+                    <div class="metric-title">Network Hashrate</div>
+                    <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
+                </div>
+                """, unsafe_allow_html=True)
             # Hashrate Chart
             if not df.empty:
                 df_chart = downsample(df)
