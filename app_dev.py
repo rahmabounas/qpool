@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
 
 # Configuration
-GITHUB_RAW_URL = "http://66.179.92.83/data/p3.csv"
+GITHUB_RAW_URL = "http://66.179.92.83/data/p2.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # Setup page
