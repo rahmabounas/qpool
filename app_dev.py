@@ -205,7 +205,6 @@ if not df.empty:
     
     
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
-    tab1 = st.tabs(["Pool Stats"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
