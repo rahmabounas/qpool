@@ -230,11 +230,9 @@ if not df.empty:
             
                 t1, = st.columns(1)
                 t2, = st.columns(1)
-                t3, = st.columns(1)
                 
-                t1.metric("POOL HASHRATE", format_hashrate(latest['pool_hashrate']), border=True)
-                t2.metric("Mean (6h)", f"{mean_hash_6h:.2f} MH/s", border=True)
-                t3.metric("NETWORK HASHRATE", f"{format_hashrate(latest['network_hashrate'])})", border=True)
+                t1.metric("QUBIC/USDT", df_chart['qubic_usdt'][-1], border=True)
+                t2.metric("XMR/USDT", df_chart['close'][-1], border=True)
         
                 with tol2:
             
