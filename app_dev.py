@@ -154,7 +154,7 @@ if not df.empty:
     
     tab1, tab2 = st.tabs(["Pool Stats", "QUBIC/XMR"])
     with tab1: 
-        col1, col2 = st.columns([1,3], border=True)
+        col1, col2 = st.columns([1,3])
         with col1:
             
             c1, = st.columns(1)
@@ -234,7 +234,7 @@ if not df.empty:
                 st.info("No hashrate data available.")
             st.markdown('</div>', unsafe_allow_html=True)
         with tab2:
-            tol1, tol2 = st.columns([1,3], border=True)
+            tol1, tol2 = st.columns([1,3])
             with tol1:
             
                 t1, = st.columns(1)
