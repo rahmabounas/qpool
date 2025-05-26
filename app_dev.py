@@ -432,7 +432,7 @@ if not df.empty:
                         st.plotly_chart(fig_prices, use_container_width=True)
                     else:
                         st.warning("No price data available to display.")
-                    st.markdown('</div>', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)                    
     with tab3:
         df_burn = load_burn_data()
         if not df_burn.empty:
