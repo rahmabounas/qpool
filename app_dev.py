@@ -228,20 +228,20 @@ if not df.empty:
             </div>
             """, unsafe_allow_html=True)
             col1a, col1b = st.columns(2)
-                with col1a: 
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-title">Current epoch ({current_epoch})</div>
-                        <div class="metric-value">{blocks_per_epoch.loc[current_epoch]}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col1b: 
-                    st.markdown(f"""
-                    <div class="metric-card">
-                        <div class="metric-title">Previous epoch ({previous_epoch}) </div>
-                        <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+            with col1a: 
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Current epoch ({current_epoch})</div>
+                    <div class="metric-value">{blocks_per_epoch.loc[current_epoch]}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with col1b: 
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Previous epoch ({previous_epoch}) </div>
+                    <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
+                </div>
+                """, unsafe_allow_html=True)
             st.markdown(f"""
             <div class="metric-card">
                 <div class="metric-title">Avg Block Interval (24h)</div>
