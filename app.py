@@ -489,13 +489,12 @@ if not df.empty:
                 height=300
             )
             st.plotly_chart(fig_burn, use_container_width=True)
-            
+                
             latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
             
             st.markdown("### 📋 Recent Burn Transactions")
             df_burn['Current Value ($)'] = df_burn['qubic_amount'] * latest_qubic_price
-            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($)', 'Current Value ($)']
-            
+            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']
             
             st.dataframe(
                 df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']].sort_values('Timestamp', ascending=False),
