@@ -492,8 +492,9 @@ if not df.empty:
             
             latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
             st.markdown("### 📋 Recent Burn Transactions")
-            df_burn['Current Value ($)'] = df_burn['QUBIC (amount)'] * latest_qubic_price
             df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']
+            df_burn['Current Value ($)'] = df_burn['QUBIC (amount)'] * latest_qubic_price
+            
             
             st.dataframe(
                 df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']].sort_values('Timestamp', ascending=False),
