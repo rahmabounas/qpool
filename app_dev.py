@@ -367,6 +367,7 @@ if not df.empty:
             """, unsafe_allow_html=True)
             
             if int(latest['pool_blocks_found']) == 68:
+                st.balloons()
                 st.markdown("""
                 <style>
                 @keyframes float {
