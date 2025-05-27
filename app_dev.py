@@ -638,6 +638,7 @@ if not df.empty:
             st.warning("No token burn data available.")
 
     with tab4:
+        stats_df, desc_df = generate_funny_pool_stats(df)
         st.subheader("🥇 World Record Table")
         st.dataframe(stats_df)
         
