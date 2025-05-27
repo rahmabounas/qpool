@@ -494,7 +494,7 @@ if not df.empty:
             
             st.markdown("### 📋 Recent Burn Transactions")
             df_burn['Current Value ($)'] = df_burn['qubic_amount'] * latest_qubic_price
-            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']
+            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($)', 'Current Value ($)']
             
             
             st.dataframe(
@@ -502,11 +502,21 @@ if not df.empty:
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Current Value ($)": st.column_config.NumberColumn(
-                        format="$%.2f"
+                    "QUBIC (amount)": st.column_config.NumberColumn(
+                        format="%,.0f"  # Adds comma separators for thousands
                     ),
                     "Value ($USDT)": st.column_config.NumberColumn(
-                        format="$%.2f"
+                        format="$%,.2f"  # Adds $ and comma separators
+                    ),
+                    "Current Value ($)": st.column_config.NumberColumn(
+                        format="$%,.2f",
+                        # Conditional styling
+                        validate=lambda x: [
+                            "background-color: rgba(0, 255, 0, 0.2); color: white" 
+                            if val > df_burn.loc[idx, 'Value ($USDT)'] 
+                            else "background-color: rgba(255, 0, 0, 0.2); color: white" 
+                            for idx, val in x.items()
+                        ]
                     )
                 }
             )
