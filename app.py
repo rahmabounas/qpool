@@ -198,7 +198,9 @@ st.markdown("""
 if not df.empty:
     latest = df.iloc[-1]
     six_hr = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=6))]
+    day_av = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=24))]
     mean_hash_6h = six_hr['pool_hashrate'].mean() / 1e6 if not six_hr.empty else 0
+    mean_hash_24h = day_av['pool_hashrate'].mean() / 1e6 if not day_av.empty else 0
     ath_val = df['pool_hashrate'][:-1].max() if len(df) > 1 else latest['pool_hashrate']
     ath_time = df[df['pool_hashrate'] == ath_val]['timestamp'].iloc[0].strftime('%Y-%m-%d') if not df.empty else "N/A"
     last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
@@ -232,8 +234,8 @@ if not df.empty:
         with col1:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-title">ATH ({ath_time})</div>
-                <div class="metric-value">{format_hashrate(ath_val)}</div>
+                <div class="metric-title">Pool Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
             </div>
             <div class="metric-card">
                 <div class="metric-title">Total Blocks Found</div>
@@ -244,34 +246,35 @@ if not df.empty:
             if int(latest['pool_blocks_found']) == 69:
                 st.balloons()
                 st.markdown("""
-                <style>
-                @keyframes float {
-                    0% { transform: translateY(0); }
-                    100% { transform: translateY(-100vh); opacity: 0; }
-                }
-            
-                .emoji {
-                    position: fixed;
-                    bottom: 0;
-                    animation: float 5s ease-in infinite;
-                    font-size: 36px;
-                }
-            
-                .emoji:nth-child(1) { left: 10%; animation-delay: 0s; }
-                .emoji:nth-child(2) { left: 30%; animation-delay: 1s; }
-                .emoji:nth-child(3) { left: 40%; animation-delay: 2s; }
-                .emoji:nth-child(4) { left: 55%; animation-delay: 3s; }
-                .emoji:nth-child(5) { left: 70%; animation-delay: 4s; }
-                .emoji:nth-child(6) { left: 90%; animation-delay: 5s; }
-                </style>
-            
-                <div class="emoji">🔥</div>
-                <div class="emoji">🎉</div>
-                <div class="emoji">6️⃣</div>
-                <div class="emoji">9️⃣</div>
-                <div class="emoji">🚀</div>
-                <div class="emoji">🍾</div>
-            """, unsafe_allow_html=True)
+                    <style>
+                    @keyframes float {
+                        0% { transform: translateY(0); }
+                        100% { transform: translateY(-100vh); opacity: 0; }
+                    }
+                
+                    .emoji {
+                        position: fixed;
+                        bottom: 0;
+                        animation: float 5s ease-in infinite;
+                        font-size: 36px;
+                    }
+                
+                    .emoji:nth-child(1) { left: 10%; animation-delay: 0s; }
+                    .emoji:nth-child(2) { left: 30%; animation-delay: 1s; }
+                    .emoji:nth-child(3) { left: 40%; animation-delay: 2s; }
+                    .emoji:nth-child(4) { left: 55%; animation-delay: 3s; }
+                    .emoji:nth-child(5) { left: 70%; animation-delay: 4s; }
+                    .emoji:nth-child(6) { left: 90%; animation-delay: 5s; }
+                    </style>
+                
+                    <div class="emoji">🔥</div>
+                    <div class="emoji">🎉</div>
+                    <div class="emoji">6️⃣</div>
+                    <div class="emoji">9️⃣</div>
+                    <div class="emoji">🚀</div>
+                    <div class="emoji">🍾</div>
+                """, unsafe_allow_html=True)
+                
             col1a, col1b = st.columns(2)
             with col1a: 
                 st.markdown(f"""
@@ -283,7 +286,7 @@ if not df.empty:
             with col1b: 
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title">Previous epoch ({previous_epoch})</div>
+                    <div class="metric-title">Previous epoch ({previous_epoch}) </div>
                     <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -295,6 +298,12 @@ if not df.empty:
                 </div>
             </div>
             """, unsafe_allow_html=True)
+            st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Pool Hashrate ATH ({ath_time})</div>
+                    <div class="metric-value">{format_hashrate(ath_val)}</div>
+                </div>
+                """, unsafe_allow_html=True)
         
         with col2:
             col2a, col2b, col2c = st.columns(3)
