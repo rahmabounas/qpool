@@ -224,24 +224,35 @@ if not df.empty:
     # Get last two epochs
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
-
-
     
     
     tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
-            st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-title">ATH ({ath_time})</div>
-                <div class="metric-value">{format_hashrate(ath_val)}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-title">Total Blocks Found</div>
-                <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
-            </div>
-            """, unsafe_allow_html=True)
+            if pool_blocks_found == 69:
+                st.balloons()
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">ATH ({ath_time})</div>
+                    <div class="metric-value">{format_hashrate(ath_val)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Total Blocks Found</div>
+                    <div class="metric-value">{🔥🎉}{int(latest['pool_blocks_found'])}{🔥🎉}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">ATH ({ath_time})</div>
+                    <div class="metric-value">{format_hashrate(ath_val)}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-title">Total Blocks Found</div>
+                    <div class="metric-value">{"int(latest['pool_blocks_found'])"}</div>
+                </div>
+                """, unsafe_allow_html=True)
             col1a, col1b = st.columns(2)
             with col1a: 
                 st.markdown(f"""
