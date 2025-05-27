@@ -350,6 +350,34 @@ if not df.empty:
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
 
+    if latest['pool_blocks_found'] == 68:
+        st.markdown("""
+        <style>
+        @keyframes float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100vh); opacity: 0; }
+        }
+    
+        .emoji {
+            position: fixed;
+            bottom: 0;
+            animation: float 5s ease-in infinite;
+            font-size: 36px;
+        }
+    
+        .emoji:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .emoji:nth-child(2) { left: 30%; animation-delay: 1s; }
+        .emoji:nth-child(3) { left: 50%; animation-delay: 2s; }
+        .emoji:nth-child(4) { left: 70%; animation-delay: 3s; }
+        .emoji:nth-child(5) { left: 90%; animation-delay: 4s; }
+        </style>
+    
+        <div class="emoji">🔥</div>
+        <div class="emoji">🎉</div>
+        <div class="emoji">💥</div>
+        <div class="emoji">🚀</div>
+        <div class="emoji">🍾</div>
+    """, unsafe_allow_html=True)
 
     
     
