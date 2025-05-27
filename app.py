@@ -230,7 +230,7 @@ if not df.empty:
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
-            if pool_blocks_found == 69:
+            if latest['pool_blocks_found'] == 69:
                 st.balloons()
                 st.markdown(f"""
                 <div class="metric-card">
