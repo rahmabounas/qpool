@@ -323,7 +323,9 @@ st.markdown("""
 if not df.empty:
     latest = df.iloc[-1]
     six_hr = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=6))]
+    day_av = df[df['timestamp'] >= (df['timestamp'].max() - timedelta(hours=24))]
     mean_hash_6h = six_hr['pool_hashrate'].mean() / 1e6 if not six_hr.empty else 0
+    mean_hash_24h = day_av['pool_hashrate'].mean() / 1e6 if not day_av.empty else 0
     ath_val = df['pool_hashrate'][:-1].max() if len(df) > 1 else latest['pool_hashrate']
     ath_time = df[df['pool_hashrate'] == ath_val]['timestamp'].iloc[0].strftime('%Y-%m-%d') if not df.empty else "N/A"
     last_block = df[df['block_found']]['timestamp'].iloc[-1] if df['block_found'].any() else None
@@ -436,6 +438,8 @@ if not df.empty:
                 <div class="metric-card">
                     <div class="metric-title">Mean (6h)</div>
                     <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
+                    <div class="metric-title">Mean (24h)</div>
+                    <div class="metric-value">{mean_hash_24h:.2f} MH/s</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col2c:
