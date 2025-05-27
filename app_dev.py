@@ -391,7 +391,8 @@ if not df.empty:
             
                 <div class="emoji">🔥</div>
                 <div class="emoji">🎉</div>
-                <div class="emoji">💥</div>
+                <div class="emoji">6️⃣</div>
+                <div class="emoji">9️⃣</div>
                 <div class="emoji">🚀</div>
                 <div class="emoji">🍾</div>
             """, unsafe_allow_html=True)
