@@ -224,6 +224,9 @@ if not df.empty:
     # Get last two epochs
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
+
+
+    
     
     tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
     with tab1: 
@@ -486,13 +489,24 @@ if not df.empty:
                 height=300
             )
             st.plotly_chart(fig_burn, use_container_width=True)
-    
+            
+            latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
             st.markdown("### 📋 Recent Burn Transactions")
-            df_burn.columns=['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']
+            df_burn['Current Value ($)'] = df_burn['QUBIC (amount)'] * latest_qubic_price
+            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']
+            
             st.dataframe(
-                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('Timestamp', ascending=False),
+                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']].sort_values('Timestamp', ascending=False),
                 use_container_width=True,
-                hide_index=True
+                hide_index=True,
+                column_config={
+                    "Current Value ($)": st.column_config.NumberColumn(
+                        format="$%.2f"
+                    ),
+                    "Value ($USDT)": st.column_config.NumberColumn(
+                        format="$%.2f"
+                    )
+                }
             )
         else:
             st.warning("No token burn data available.")
