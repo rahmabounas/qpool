@@ -239,7 +239,7 @@ if not df.empty:
             </div>
             <div class="metric-card">
                 <div class="metric-title">Total Blocks Found</div>
-                <div class="metric-value">{"int(latest['pool_blocks_found'])"}</div>
+                <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
             </div>
             """, unsafe_allow_html=True)
 
