@@ -502,21 +502,11 @@ if not df.empty:
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "QUBIC (amount)": st.column_config.NumberColumn(
-                        format="%,.0f"  # Adds comma separators for thousands
+                    "Current Value ($)": st.column_config.NumberColumn(
+                        format="$%.2f"
                     ),
                     "Value ($USDT)": st.column_config.NumberColumn(
-                        format="$%,.2f"  # Adds $ and comma separators
-                    ),
-                    "Current Value ($)": st.column_config.NumberColumn(
-                        format="$%,.2f",
-                        # Conditional styling
-                        validate=lambda x: [
-                            "background-color: rgba(0, 255, 0, 0.2); color: white" 
-                            if val > df_burn.loc[idx, 'Value ($USDT)'] 
-                            else "background-color: rgba(255, 0, 0, 0.2); color: white" 
-                            for idx, val in x.items()
-                        ]
+                        format="$%.2f"
                     )
                 }
             )
