@@ -232,6 +232,7 @@ if not df.empty:
         with col1:
             if latest['pool_blocks_found'] == 69:
                 st.balloons()
+            st.markdown(f"""
             <div class="metric-card">
                 <div class="metric-title">ATH ({ath_time})</div>
                 <div class="metric-value">{format_hashrate(ath_val)}</div>
@@ -253,7 +254,7 @@ if not df.empty:
             with col1b: 
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title">Previous epoch ({previous_epoch}) </div>
+                    <div class="metric-title">Previous epoch ({previous_epoch})</div>
                     <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
                 </div>
                 """, unsafe_allow_html=True)
