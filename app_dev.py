@@ -24,7 +24,7 @@ st.markdown("""
 <style>
     
     .element-container:has(.js-plotly-plot) {
-        padding-bottom: 0 !important;
+        padding-bottom: 10 !important;
         margin-bottom: -10px;
     }
 
@@ -34,7 +34,7 @@ st.markdown("""
     }
 
     .stButton > button {
-        background-color: #4cc9f0;
+        background-color: #26303A;
         color: white;
         border-radius: 8px;
         padding: 0.5rem 1rem;
@@ -184,6 +184,131 @@ def load_burn_data():
         st.error(f"Failed to load burn data: {str(e)}")
         return pd.DataFrame()
 
+def generate_funny_pool_stats(df: pd.DataFrame):
+    # Ensure datetime parsing and sort
+    df = df.drop_duplicates(subset="timestamp")
+    df = df.copy()
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp_hour"] = pd.to_datetime(df["timestamp_hour"])
+    df = df.sort_values("timestamp")
+
+    # Time groupings
+    df["hour"] = df["timestamp"].dt.floor("h")
+    df["4h"] = df["timestamp"].dt.floor("4h")
+    df["day"] = df["timestamp"].dt.floor("d")
+    df["week"] = df["timestamp"].dt.to_period("W").dt.start_time
+    df["month"] = df["timestamp"].dt.to_period("M").dt.start_time
+
+    results = []
+    descriptions = []
+
+    def add_stat(name, score, date, desc):
+        results.append({"Competition": name, "Score": score, "Date": str(date)})
+        descriptions.append({"Competition": name, "Description": desc})
+
+    # 1. Pool Hashrate ATH
+    ath = df["pool_hashrate"].max()
+    ath_time = df[df["pool_hashrate"] == ath]["timestamp"].iloc[0]
+    add_stat("Pool Hashrate ATH", f"{ath:,}", ath_time, "Highest recorded hashrate of the pool.")
+
+    # 2. Sprint (1h)
+    blocks_1h = df.groupby("hour")["pool_blocks_found"].max()
+    sprint = blocks_1h.max()
+    sprint_time = blocks_1h.idxmax()
+    add_stat("Sprint", f"{sprint} blocks", sprint_time, "Most blocks found in a single hour.")
+
+    # 3. Mid-distance (4h)
+    blocks_4h = df.groupby("4h")["pool_blocks_found"].max()
+    mid = blocks_4h.max()
+    mid_time = blocks_4h.idxmax()
+    add_stat("Mid-distance", f"{mid} blocks", mid_time, "Most blocks found in a 4-hour window.")
+
+    # 4. Long-distance (24h)
+    blocks_day = df.groupby("day")["pool_blocks_found"].max()
+    long_dist = blocks_day.max()
+    long_time = blocks_day.idxmax()
+    add_stat("Long-distance", f"{long_dist} blocks", long_time, "Most blocks found in 24 hours.")
+
+    # 5. Marathon (week)
+    blocks_week = df.groupby("week")["pool_blocks_found"].max()
+    marathon = blocks_week.max()
+    marathon_time = blocks_week.idxmax()
+    add_stat("Marathon", f"{marathon} blocks", marathon_time, "Most blocks found in a week.")
+
+    # 6. Ultra Marathon (month)
+    blocks_month = df.groupby("month")["pool_blocks_found"].max()
+    ultra = blocks_month.max()
+    ultra_time = blocks_month.idxmax()
+    add_stat("Ultra Marathon", f"{ultra} blocks", ultra_time, "Most blocks found in a month.")
+
+    # 7. Lightning Round (shortest 3 blocks found)
+    block_changes = df[df["pool_blocks_found"].diff() > 0]["timestamp"]
+    if len(block_changes) >= 3:
+        min_diff = (block_changes.diff(2)).min()
+        short_span_time = block_changes.iloc[2]
+        add_stat("Lightning Round", f"3 blocks in {min_diff}", short_span_time, "Fastest time to mine 3 blocks.")
+    else:
+        add_stat("Lightning Round", "Insufficient data", "N/A", "Fastest time to mine 3 blocks.")
+
+    # 8. Dry Spell (longest gap between blocks)
+    block_times = df[df["pool_blocks_found"].diff() > 0]["timestamp"]
+    if len(block_times) >= 2:
+        dry_spell = block_times.diff().max()
+        dry_time = block_times[block_times.diff() == dry_spell].iloc[0]
+        add_stat("Dry Spell", f"No block for {dry_spell}", dry_time, "Longest time without finding a block.")
+    else:
+        add_stat("Dry Spell", "Insufficient data", "N/A", "Longest time without finding a block.")
+
+    # 9. Golden Hour (most estimated reward in 1 hour)
+    df["reward_est"] = df["pool_blocks_found"].diff().clip(lower=0) * df["close"]
+    reward_hour = df.groupby("hour")["reward_est"].sum()
+    golden_hour_val = reward_hour.max()
+    golden_hour_time = reward_hour.idxmax()
+    add_stat("Golden Hour", f"{golden_hour_val:.2f} QUBIC", golden_hour_time, "Most QUBIC rewards estimated in 1 hour.")
+
+    # 10. Lucky Shot (biggest single block reward)
+    if not df["reward_est"].isna().all():
+        lucky_val = df["reward_est"].max()
+        lucky_time = df[df["reward_est"] == lucky_val]["timestamp"].iloc[0]
+        add_stat("Lucky Shot", f"{lucky_val:.2f} QUBIC", lucky_time, "Highest estimated reward from a single block.")
+
+    # 11. Ghostbuster (uncle blocks, not tracked)
+    add_stat("Ghostbuster", "N/A", "N/A", "Most uncle blocks processed (data unavailable).")
+
+    # 12. Hash Surge (biggest 1h % gain)
+    df["hashrate_diff"] = df["pool_hashrate"].pct_change()
+    hash_surge = df["hashrate_diff"].max()
+    if pd.notnull(hash_surge):
+        surge_time = df[df["hashrate_diff"] == hash_surge]["timestamp"].iloc[0]
+        add_stat("Hash Surge", f"{hash_surge:.2%}", surge_time, "Largest % increase in hashrate.")
+    else:
+        add_stat("Hash Surge", "N/A", "N/A", "Largest % increase in hashrate.")
+
+    # 13. Grind King (longest block streak)
+    block_found = df["pool_blocks_found"].diff().fillna(0) > 0
+    streaks = (block_found != block_found.shift()).cumsum()
+    longest_streak = block_found.groupby(streaks).sum().max()
+    if longest_streak > 0:
+        streak_time = df.loc[block_found.groupby(streaks).sum().idxmax(), "timestamp"]
+        add_stat("Grind King", f"{int(longest_streak)} blocks", streak_time, "Longest uninterrupted block finding streak.")
+    else:
+        add_stat("Grind King", "N/A", "N/A", "Longest uninterrupted block finding streak.")
+
+    # 14. Team Effort (not available)
+    add_stat("Team Effort", "N/A", "N/A", "Most miners online at once (not tracked).")
+
+    # 15. Power Hour (highest average hashrate in 1h)
+    hash_hour = df.groupby("hour")["pool_hashrate"].mean()
+    power_val = hash_hour.max()
+    power_time = hash_hour.idxmax()
+    add_stat("Power Hour", f"{power_val:,.0f}", power_time, "Hour with the highest average hashrate.")
+
+    results_df = pd.DataFrame(results)
+    descriptions_df = pd.DataFrame(descriptions)
+
+    return results_df, descriptions_df
+
+
 # Load data
 df = load_data()
 
@@ -224,8 +349,11 @@ if not df.empty:
     # Get last two epochs
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
+
+
     
-    tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
+    
+    tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "World Records"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
@@ -486,18 +614,35 @@ if not df.empty:
                 height=300
             )
             st.plotly_chart(fig_burn, use_container_width=True)
-    
+                
+            latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
+            
             st.markdown("### 📋 Recent Burn Transactions")
-            df_burn.columns=['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']
+            df_burn['Current Value ($)'] = df_burn['qubic_amount'] * latest_qubic_price
+            df_burn.columns = ['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']
+            
             st.dataframe(
-                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)']].sort_values('Timestamp', ascending=False),
+                df_burn[['Timestamp', 'TX', 'QUBIC (amount)', 'Value ($USDT)', 'Current Value ($)']].sort_values('Timestamp', ascending=False),
                 use_container_width=True,
-                hide_index=True
+                hide_index=True,
+                column_config={
+                    "Current Value ($)": st.column_config.NumberColumn(
+                        format="$%.2f"
+                    ),
+                    "Value ($USDT)": st.column_config.NumberColumn(
+                        format="$%.2f"
+                    )
+                }
             )
         else:
             st.warning("No token burn data available.")
 
-
+    with tab4:
+        st.subheader("🥇 World Record Table")
+        st.dataframe(stats_df)
+        
+        with st.expander("📘 Competition Descriptions"):
+            st.dataframe(desc_df)
 # Manual Refresh Button
 if st.button("🔄 Refresh Data", key="refresh"):
     st.cache_data.clear()
