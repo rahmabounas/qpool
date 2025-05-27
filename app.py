@@ -232,27 +232,16 @@ if not df.empty:
         with col1:
             if latest['pool_blocks_found'] == 69:
                 st.balloons()
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">ATH ({ath_time})</div>
-                    <div class="metric-value">{format_hashrate(ath_val)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-title">Total Blocks Found</div>
-                    <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="metric-card">
-                    <div class="metric-title">ATH ({ath_time})</div>
-                    <div class="metric-value">{format_hashrate(ath_val)}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-title">Total Blocks Found</div>
-                    <div class="metric-value">{"int(latest['pool_blocks_found'])"}</div>
-                </div>
-                """, unsafe_allow_html=True)
+            <div class="metric-card">
+                <div class="metric-title">ATH ({ath_time})</div>
+                <div class="metric-value">{format_hashrate(ath_val)}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">Total Blocks Found</div>
+                <div class="metric-value">{int(latest['pool_blocks_found'])}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
             col1a, col1b = st.columns(2)
             with col1a: 
                 st.markdown(f"""
