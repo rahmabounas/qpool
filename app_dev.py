@@ -359,8 +359,8 @@ if not df.empty:
         with col1:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-title">ATH ({ath_time})</div>
-                <div class="metric-value">{format_hashrate(ath_val)}</div>
+                <div class="metric-title">Pool Hashrate</div>
+                <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
             </div>
             <div class="metric-card">
                 <div class="metric-title">Total Blocks Found</div>
@@ -423,23 +423,26 @@ if not df.empty:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-        
+            st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Pool Hashrate ATH ({ath_time})</div>
+                    <div class="metric-value">{format_hashrate(ath_val)}</div>
+                </div>
+                """, unsafe_allow_html=True)        
         with col2:
             col2a, col2b, col2c = st.columns(3)
             with col2a:
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title">Pool Hashrate</div>
-                    <div class="metric-value">{format_hashrate(latest['pool_hashrate'])}</div>
+                    <div class="metric-title">Mean Hashrate (last 24h)</div>
+                    <div class="metric-value">{mean_hash_24h:.2f} MH/s</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col2b:
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title">Mean (6h)</div>
+                    <div class="metric-title"Mean Hashrate (last 6h)</div>
                     <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
-                    <div class="metric-title">Mean (24h)</div>
-                    <div class="metric-value">{mean_hash_24h:.2f} MH/s</div>
                 </div>
                 """, unsafe_allow_html=True)
             with col2c:
