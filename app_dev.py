@@ -76,7 +76,7 @@ st.markdown(f"""
 
     <a href="https://matildaonqubic.com/" target="_blank">
     <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
-       title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I am chasing the Monero blocks. 🐱" />
+       title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
     </a>
 """, unsafe_allow_html=True)
 
@@ -245,10 +245,11 @@ def load_burn_data():
         st.error(f"Failed to load burn data: {str(e)}")
         return pd.DataFrame()
 
+import pandas as pd
+
 def generate_funny_pool_stats(df: pd.DataFrame):
-    # Ensure datetime parsing and sort
-    df = df.drop_duplicates(subset="timestamp")
-    df = df.copy()
+    # Remove duplicates and parse timestamps
+    df = df.drop_duplicates(subset="timestamp").copy()
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df["timestamp_hour"] = pd.to_datetime(df["timestamp_hour"])
     df = df.sort_values("timestamp")
@@ -260,6 +261,9 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     df["week"] = df["timestamp"].dt.to_period("W").dt.start_time
     df["month"] = df["timestamp"].dt.to_period("M").dt.start_time
 
+    # Calculate delta in blocks (assumes pool_blocks_found is cumulative)
+    df["blocks_delta"] = df["pool_blocks_found"].diff().fillna(0)
+
     results = []
     descriptions = []
 
@@ -270,34 +274,34 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     # 1. Pool Hashrate ATH
     ath = df["pool_hashrate"].max()
     ath_time = df[df["pool_hashrate"] == ath]["timestamp"].iloc[0]
-    add_stat("Pool Hashrate ATH", f"{ath:,}", ath_time, "Highest recorded hashrate of the pool.")
+    add_stat("Pool Hashrate ATH", f"{ath:,.0f}", ath_time, "Highest recorded hashrate of the pool.")
 
     # 2. Sprint (1h)
-    blocks_1h = df.groupby("hour")["pool_blocks_found"].max()
+    blocks_1h = df.groupby("hour")["blocks_delta"].sum()
     sprint = blocks_1h.max()
     sprint_time = blocks_1h.idxmax()
-    add_stat("Sprint", f"{sprint} blocks", sprint_time, "Most blocks found in a single hour.")
+    add_stat("Sprint", f"{int(sprint)} blocks", sprint_time, "Most blocks found in a single hour.")
 
     # 3. Mid-distance (4h)
-    blocks_4h = df.groupby("4h")["pool_blocks_found"].max()
+    blocks_4h = df.groupby("4h")["blocks_delta"].sum()
     mid = blocks_4h.max()
     mid_time = blocks_4h.idxmax()
-    add_stat("Mid-distance", f"{mid} blocks", mid_time, "Most blocks found in a 4-hour window.")
+    add_stat("Mid-distance", f"{int(mid)} blocks", mid_time, "Most blocks found in a 4-hour window.")
 
     # 4. Long-distance (24h)
-    blocks_day = df.groupby("day")["pool_blocks_found"].max()
+    blocks_day = df.groupby("day")["blocks_delta"].sum()
     long_dist = blocks_day.max()
     long_time = blocks_day.idxmax()
-    add_stat("Long-distance", f"{long_dist} blocks", long_time, "Most blocks found in 24 hours.")
+    add_stat("Long-distance", f"{int(long_dist)} blocks", long_time, "Most blocks found in 24 hours.")
 
     # 5. Marathon (week)
-    blocks_week = df.groupby("week")["pool_blocks_found"].max()
+    blocks_week = df.groupby("week")["blocks_delta"].sum()
     marathon = blocks_week.max()
     marathon_time = blocks_week.idxmax()
-    add_stat("Marathon", f"{marathon} blocks", marathon_time, "Most blocks found in a week.")
+    add_stat("Marathon", f"{int(marathon)} blocks", marathon_time, "Most blocks found in a week.")
 
-    # 6. Lightning Round (shortest 3 blocks found)
-    block_changes = df[df["pool_blocks_found"].diff() > 0]["timestamp"]
+    # 6. Lightning Round (shortest time to mine 3 blocks)
+    block_changes = df[df["blocks_delta"] > 0]["timestamp"]
     if len(block_changes) >= 3:
         min_diff = (block_changes.diff(2)).min()
         short_span_time = block_changes.iloc[2]
@@ -317,6 +321,8 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     return results_df, descriptions_df
 
 
+
+
 # Load data
 df = load_data()
 
@@ -324,49 +330,6 @@ st.markdown("""
 <div style="text-align: left; margin-bottom: 2rem;">
 <svg width="95" height="26" viewBox="0 0 95 26" fill="none" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer"><path d="M5.25 2H0.75C0.335786 2 0 2.33579 0 2.75V19.25C0 19.6642 0.335786 20 0.75 20H5.25C5.66421 20 6 19.6642 6 19.25V2.75C6 2.33579 5.66421 2 5.25 2Z" fill="white"></path><path d="M13.25 2H8.75C8.33579 2 8 2.33579 8 2.75V25.25C8 25.6642 8.33579 26 8.75 26H13.25C13.6642 26 14 25.6642 14 25.25V2.75C14 2.33579 13.6642 2 13.25 2Z" fill="white"></path><path d="M78.2335 20.5641C77.0029 20.5641 75.8848 20.3041 74.8795 19.7841C73.8915 19.2641 73.1028 18.5101 72.5135 17.5221C71.9415 16.5341 71.6555 15.3467 71.6555 13.9601V13.6221C71.6555 12.2354 71.9415 11.0567 72.5135 10.0861C73.1028 9.09807 73.8915 8.34407 74.8795 7.82407C75.8848 7.28673 77.0029 7.01807 78.2335 7.01807C79.4642 7.01807 80.5128 7.2434 81.3795 7.69407C82.2462 8.14473 82.9395 8.74273 83.4595 9.48807C83.9969 10.2334 84.3435 11.0567 84.4995 11.9581L81.8995 12.5041C81.8129 11.9321 81.6308 11.4121 81.3535 10.9441C81.0762 10.4761 80.6862 10.1034 80.1835 9.82607C79.6809 9.54873 79.0482 9.41007 78.2855 9.41007C77.5402 9.41007 76.8642 9.5834 76.2575 9.93007C75.6682 10.2594 75.2002 10.7447 74.8535 11.3861C74.5068 12.0101 74.3335 12.7727 74.3335 13.6741V13.9081C74.3335 14.8094 74.5068 15.5807 74.8535 16.2221C75.2002 16.8634 75.6682 17.3487 76.2575 17.6781C76.8642 18.0074 77.5402 18.1721 78.2855 18.1721C79.4122 18.1721 80.2702 17.8861 80.8595 17.3141C81.4488 16.7247 81.8215 15.9794 81.9775 15.0781L84.5775 15.6761C84.3695 16.5601 83.9969 17.3747 83.4595 18.1201C82.9395 18.8654 82.2462 19.4634 81.3795 19.9141C80.5128 20.3474 79.4642 20.5641 78.2335 20.5641Z" fill="white"></path><path d="M67.4473 20.2V7.382H70.1252V20.2H67.4473ZM68.7992 5.64C68.2792 5.64 67.8372 5.47533 67.4732 5.146C67.1266 4.79933 66.9532 4.35733 66.9532 3.82C66.9532 3.28267 67.1266 2.84933 67.4732 2.52C67.8372 2.17333 68.2792 2 68.7992 2C69.3366 2 69.7786 2.17333 70.1252 2.52C70.4719 2.84933 70.6452 3.28267 70.6452 3.82C70.6452 4.35733 70.4719 4.79933 70.1252 5.146C69.7786 5.47533 69.3366 5.64 68.7992 5.64Z" fill="white"></path><path d="M60.021 20.564C58.773 20.564 57.811 20.3387 57.135 19.888C56.4763 19.4373 55.9823 18.9347 55.653 18.38H55.237V20.2H52.611V2H55.289V9.124H55.705C55.913 8.77733 56.1903 8.448 56.537 8.136C56.8836 7.80667 57.343 7.538 57.915 7.33C58.487 7.122 59.189 7.018 60.021 7.018C61.0956 7.018 62.0836 7.278 62.985 7.798C63.8863 8.318 64.6056 9.072 65.143 10.06C65.6803 11.048 65.949 12.2267 65.949 13.596V13.986C65.949 15.3727 65.6716 16.56 65.117 17.548C64.5796 18.5187 63.8603 19.264 62.959 19.784C62.075 20.304 61.0956 20.564 60.021 20.564ZM59.241 18.224C60.4023 18.224 61.3556 17.8513 62.101 17.106C62.8636 16.3607 63.245 15.2947 63.245 13.908V13.674C63.245 12.3047 62.8723 11.2473 62.127 10.502C61.3816 9.75667 60.4196 9.384 59.241 9.384C58.097 9.384 57.1436 9.75667 56.381 10.502C55.6356 11.2473 55.263 12.3047 55.263 13.674V13.908C55.263 15.2947 55.6356 16.3607 56.381 17.106C57.1436 17.8513 58.097 18.224 59.241 18.224Z" fill="white"></path><path d="M43.3742 20.4341C42.4035 20.4341 41.5369 20.2174 40.7742 19.7841C40.0115 19.3507 39.4135 18.7354 38.9802 17.9381C38.5469 17.1407 38.3302 16.1874 38.3302 15.0781V7.38208H41.0082V14.8961C41.0082 16.0054 41.2855 16.8287 41.8402 17.3661C42.3949 17.8861 43.1662 18.1461 44.1542 18.1461C45.2462 18.1461 46.1215 17.7821 46.7802 17.0541C47.4562 16.3087 47.7942 15.2427 47.7942 13.8561V7.38208H50.4722V20.2001H47.8462V18.2761H47.4302C47.1875 18.7961 46.7542 19.2901 46.1302 19.7581C45.5062 20.2087 44.5875 20.4341 43.3742 20.4341Z" fill="white"></path><path d="M33.66 25.4001V18.4581H33.244C33.0533 18.8047 32.776 19.1427 32.412 19.4721C32.048 19.7841 31.58 20.0441 31.008 20.2521C30.4533 20.4601 29.76 20.5641 28.928 20.5641C27.8533 20.5641 26.8653 20.3041 25.964 19.7841C25.0627 19.2641 24.3433 18.5187 23.806 17.5481C23.2687 16.5601 23 15.3727 23 13.9861V13.5961C23 12.2094 23.2687 11.0307 23.806 10.0601C24.3607 9.07207 25.0887 8.31807 25.99 7.79807C26.8913 7.27807 27.8707 7.01807 28.928 7.01807C30.176 7.01807 31.1293 7.2434 31.788 7.69407C32.464 8.14473 32.9667 8.65607 33.296 9.22807H33.712V7.38207H36.338V25.4001H33.66ZM29.682 18.2241C30.8607 18.2241 31.8227 17.8514 32.568 17.1061C33.3133 16.3607 33.686 15.2947 33.686 13.9081V13.6741C33.686 12.3047 33.3047 11.2474 32.542 10.5021C31.7967 9.75673 30.8433 9.38407 29.682 9.38407C28.538 9.38407 27.5847 9.75673 26.822 10.5021C26.0767 11.2474 25.704 12.3047 25.704 13.6741V13.9081C25.704 15.2947 26.0767 16.3607 26.822 17.1061C27.5847 17.8514 28.538 18.2241 29.682 18.2241Z" fill="white"></path></svg>
 </div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-    <style>
-    .breaking-wrapper {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: red;
-        color: white;
-        overflow: hidden;
-        height: 40px;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-    }
-
-    .breaking-text {
-        display: inline-block;
-        white-space: nowrap;
-        padding-left: 100%;
-        animation: scroll-left 15s linear infinite;
-        font-weight: bold;
-        font-size: 18px;
-    }
-
-    @keyframes scroll-left {
-        0%   { transform: translateX(0%); }
-        100% { transform: translateX(-100%); }
-    }
-
-    /* Push content down */
-    .main .block-container {
-        padding-top: 50px;
-    }
-    </style>
-
-    <div class="breaking-wrapper">
-        <div class="breaking-text">
-            🚨 BREAKING: Devs forget about testnet! 🚨 BREAKING: Devs forget about testnet! 🚨 BREAKING: Devs forget about testnet!
-        </div>
-    </div>
 """, unsafe_allow_html=True)
 
 
@@ -402,9 +365,13 @@ if not df.empty:
     # Get last two epochs
     current_epoch = epoch_blocks.index[-1]
     previous_epoch = epoch_blocks.index[-2] if len(epoch_blocks) > 1 else None
+
+    # Calculate delta in blocks found
+    df["blocks_delta"] = df["pool_blocks_found"].diff().fillna(0)
     
+
     
-    tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "World Records"])
+    tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
@@ -419,38 +386,6 @@ if not df.empty:
             </div>
             """, unsafe_allow_html=True)
             
-            if int(latest['pool_blocks_found']) == 68:
-                st.balloons()
-                st.markdown("""
-                    <style>
-                    @keyframes float {
-                        0% { transform: translateY(0); }
-                        100% { transform: translateY(-100vh); opacity: 0; }
-                    }
-                
-                    .emoji {
-                        position: fixed;
-                        bottom: 0;
-                        animation: float 5s ease-in infinite;
-                        font-size: 36px;
-                    }
-                
-                    .emoji:nth-child(1) { left: 10%; animation-delay: 0s; }
-                    .emoji:nth-child(2) { left: 30%; animation-delay: 1s; }
-                    .emoji:nth-child(3) { left: 40%; animation-delay: 2s; }
-                    .emoji:nth-child(4) { left: 55%; animation-delay: 3s; }
-                    .emoji:nth-child(5) { left: 70%; animation-delay: 4s; }
-                    .emoji:nth-child(6) { left: 90%; animation-delay: 5s; }
-                    </style>
-                
-                    <div class="emoji">🔥</div>
-                    <div class="emoji">🎉</div>
-                    <div class="emoji">6️⃣</div>
-                    <div class="emoji">9️⃣</div>
-                    <div class="emoji">🚀</div>
-                    <div class="emoji">🍾</div>
-                """, unsafe_allow_html=True)
-                
             col1a, col1b = st.columns(2)
             with col1a: 
                 st.markdown(f"""
@@ -463,7 +398,7 @@ if not df.empty:
                 st.markdown(f"""
                 <div class="metric-card">
                     <div class="metric-title">Previous epoch ({previous_epoch}) </div>
-                    <div class="metric-value" title="Incorrect value (duck-tape fix to handle issues with RPC).">{blocks_per_epoch.loc[previous_epoch]}</div>
+                    <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
                 </div>
                 """, unsafe_allow_html=True)
             st.markdown(f"""
@@ -479,7 +414,8 @@ if not df.empty:
                     <div class="metric-title">Pool Hashrate ATH ({ath_time})</div>
                     <div class="metric-value">{format_hashrate(ath_val)}</div>
                 </div>
-                """, unsafe_allow_html=True)        
+                """, unsafe_allow_html=True)
+        
         with col2:
             col2a, col2b, col2c = st.columns(3)
             with col2a:
@@ -492,7 +428,7 @@ if not df.empty:
             with col2b:
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title>Mean Hashrate (last 6h)</div>
+                    <div class="metric-title">Mean Hashrate (last 6h)</div>
                     <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -733,6 +669,7 @@ if not df.empty:
         
         with st.expander("📘 Competition Descriptions"):
             st.dataframe(desc_df)
+
 # Manual Refresh Button
 if st.button("🔄 Refresh Data", key="refresh"):
     st.cache_data.clear()
