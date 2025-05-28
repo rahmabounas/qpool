@@ -412,7 +412,7 @@ if not df.empty:
                 st.markdown(f"""
                 <div class="metric-card">
                     <div class="metric-title">Previous epoch ({previous_epoch}) </div>
-                    <div class="metric-value">{blocks_per_epoch.loc[previous_epoch]}</div>
+                     <div class="metric-value" title="Incorrect value (duck-tape fix to handle issues with RPC).">{blocks_per_epoch.loc[previous_epoch]}</div>
                 </div>
                 """, unsafe_allow_html=True)
             st.markdown(f"""
