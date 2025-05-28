@@ -321,8 +321,9 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     # 7. Power Hour (highest average hashrate in 1h)
     hash_hour = df.groupby("hour")["pool_hashrate"].mean()
     power_val = hash_hour.max()
+    pp_mhs = power_val / 1_000_000
     power_time = hash_hour.idxmax()
-    add_stat("Pool Hashrate Power Hour", f"{power_val:,.2f} MH/s", power_time, "Hour with the highest average pool hashrate.")
+    add_stat("Pool Hashrate Power Hour", f"{pp_mhs:,.2f} MH/s", power_time, "Hour with the highest average pool hashrate.")
 
     results_df = pd.DataFrame(results)
     descriptions_df = pd.DataFrame(descriptions)
