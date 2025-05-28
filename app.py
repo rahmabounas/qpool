@@ -76,7 +76,7 @@ st.markdown(f"""
 
     <a href="https://matildaonqubic.com/" target="_blank">
     <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
-       title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I am chasing the Monero blocks. 🐱" />
+       title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
     </a>
 """, unsafe_allow_html=True)
 
