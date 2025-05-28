@@ -40,45 +40,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# HTML and CSS for floating and clickable image
-st.markdown(f"""
-    <style>
-    @keyframes floatCat {{
-        0% {{ transform: translate(0, 0); }}
-        100% {{ transform: translate({move_x}px, {move_y}px); }}
-    }}
 
-    .floating-cat {{
-        position: fixed;
-        top: {top}%;
-        left: {left}%;
-        width: 100px;
-        z-index: 9999;
-        animation: floatCat {duration}s ease-in-out infinite alternate;
-        cursor: pointer;
-        border-radius: 50%;
-        object-fit: cover;
-    }}
-
-    .cat-message {{
-        display: none;
-        position: fixed;
-        top: {top + 5}%;
-        left: {left + 5}%;
-        font-size: 20px;
-        background-color: #fff7dc;
-        padding: 10px 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px #999;
-        z-index: 9999;
-    }}
-    </style>
-
-    <a href="https://matildaonqubic.com/" target="_blank">
-    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
-       title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
-    </a>
-""", unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
@@ -278,7 +240,7 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     ath = df["pool_hashrate"].max()
     ath_time = df[df["pool_hashrate"] == ath]["timestamp"].iloc[0]
     ath_mhs = ath / 1_000_000
-    add_stat("Pool Hashrate ATH", f"{ath_mhs:,.2f} MH/s", ath_time, "Pool Hashrate All Time High", epoch="N/A")
+    add_stat("Pool Hashrate ATH", f"{ath_mhs:,.2f} MH/s", ath_time, "HHashrate All Time High", epoch="N/A")
     
 
     # 2. Sprint (1h)
@@ -321,9 +283,8 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     # 7. Power Hour (highest average hashrate in 1h)
     hash_hour = df.groupby("hour")["pool_hashrate"].mean()
     power_val = hash_hour.max()
-    pp_mhs = power_val / 1_000_000
     power_time = hash_hour.idxmax()
-    add_stat("Pool Hashrate Power Hour", f"{pp_mhs:,.2f} MH/s", power_time, "Hour with the highest average pool hashrate.")
+    add_stat("Pool Hashrate Power Hour", f"{power_val:,.2f} MH/s", power_time, "Hour with the highest average hashrate.")
 
     results_df = pd.DataFrame(results)
     descriptions_df = pd.DataFrame(descriptions)
@@ -679,10 +640,54 @@ if not df.empty:
         with st.expander("📘 Competition Descriptions"):
             st.dataframe(desc_df)
 
-# Manual Refresh Button
-if st.button("🔄 Refresh Data", key="refresh"):
-    st.cache_data.clear()
-    st.rerun()
+bcol1, bcol2 = st.columns(2)
+with bcol1:
+    # Manual Refresh Button
+    if st.button("🔄 Refresh Data", key="refresh"):
+        st.cache_data.clear()
+        st.rerun()
+with bcol2:
+    if st.button("🐱 Release The Beast", key="beast"):
+        # HTML and CSS for floating and clickable image
+        st.markdown(f"""
+            <style>
+            @keyframes floatCat {{
+                0% {{ transform: translate(0, 0); }}
+                100% {{ transform: translate({move_x}px, {move_y}px); }}
+            }}
+        
+            .floating-cat {{
+                position: fixed;
+                top: {top}%;
+                left: {left}%;
+                width: 100px;
+                z-index: 9999;
+                animation: floatCat {duration}s ease-in-out infinite alternate;
+                cursor: pointer;
+                border-radius: 50%;
+                object-fit: cover;
+            }}
+        
+            .cat-message {{
+                display: none;
+                position: fixed;
+                top: {top + 5}%;
+                left: {left + 5}%;
+                font-size: 20px;
+                background-color: #fff7dc;
+                padding: 10px 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px #999;
+                z-index: 9999;
+            }}
+            </style>
+        
+            <a href="https://matildaonqubic.com/" target="_blank">
+            <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
+               title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
+            </a>
+        """, unsafe_allow_html=True)
+
 
 # Footer
 st.markdown("""
