@@ -75,7 +75,7 @@ st.markdown(f"""
     </style>
 
     <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
-     title="Hello! I'm Matilda the Satoshi Cat. In my idle time, I am chasing Monero blocks. 🐱" 
+     title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I am chasing the Monero blocks. 🐱" 
      onclick="document.getElementById('cat-msg').style.display='block';"/>
 """, unsafe_allow_html=True)
 
