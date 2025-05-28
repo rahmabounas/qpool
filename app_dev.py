@@ -72,8 +72,9 @@ st.markdown(f"""
     }}
     </style>
 
-    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat" onclick="document.getElementById('cat-msg').style.display='block';"/>
-    <div id="cat-msg" class="cat-message">😺 You found the floating cat!</div>
+    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
+     title="Hello! I'm Matilda the Satoshi Cat. In my idle time, I am chasing Monero blocks. 🐱" 
+     onclick="document.getElementById('cat-msg').style.display='block';"/>
 """, unsafe_allow_html=True)
 
 # Custom CSS
