@@ -7,10 +7,31 @@ import ccxt
 import numpy as np
 from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
+import base64
+import random
 
 # Configuration
 GITHUB_RAW_URL = "http://66.179.92.83/data/qpool_V1.csv"
 REFRESH_INTERVAL = 5  # seconds
+
+# Encode the cat image to base64
+cat_image_path = "data/matilda.jpg"
+with open(cat_image_path, "rb") as img_file:
+    encoded_cat = base64.b64encode(img_file.read()).decode("utf-8")
+
+# Random initial position
+top = random.randint(10, 80)
+left = random.randint(10, 80)
+
+# Random animation movement
+move_x = random.randint(-100, 100)
+move_y = random.randint(-100, 100)
+duration = random.randint(6, 12)
+
+# Generate random position and animation duration
+top = random.randint(10, 80)
+left = random.randint(10, 80)
+duration = random.randint(5, 15)
 
 # Setup page
 st.set_page_config(
@@ -18,6 +39,45 @@ st.set_page_config(
     page_icon="⛏️",
     layout="wide"
 )
+
+# HTML and CSS for floating and clickable image
+st.markdown(f"""
+    <style>
+    @keyframes floatCat {{
+        0% {{ transform: translate(0, 0); }}
+        100% {{ transform: translate({move_x}px, {move_y}px); }}
+    }}
+
+    .floating-cat {{
+        position: fixed;
+        top: {top}%;
+        left: {left}%;
+        width: 100px;
+        z-index: 9999;
+        animation: floatCat {duration}s ease-in-out infinite alternate;
+        cursor: pointer;
+        border-radius: 50%;
+        object-fit: cover;
+    }}
+
+    .cat-message {{
+        display: none;
+        position: fixed;
+        top: {top + 5}%;
+        left: {left + 5}%;
+        font-size: 20px;
+        background-color: #fff7dc;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #999;
+        z-index: 9999;
+    }}
+    </style>
+
+    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
+     title="Hello! I'm Matilda the Satoshi Cat. In my idle time, I am chasing Monero blocks. 🐱" 
+     onclick="document.getElementById('cat-msg').style.display='block';"/>
+""", unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
