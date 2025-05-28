@@ -7,10 +7,19 @@ import ccxt
 import numpy as np
 from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
+import random
 
 # Configuration
 GITHUB_RAW_URL = "http://66.179.92.83/data/qpool_V1.csv"
 REFRESH_INTERVAL = 5  # seconds
+
+# Load the image path
+cat_image_path = "data/matilda.png"
+
+# Generate random position and animation duration
+top = random.randint(10, 80)
+left = random.randint(10, 80)
+duration = random.randint(5, 15)
 
 # Setup page
 st.set_page_config(
@@ -18,6 +27,29 @@ st.set_page_config(
     page_icon="⛏️",
     layout="wide"
 )
+
+
+# Display the image using HTML with animation
+st.markdown(f"""
+    <style>
+    @keyframes floatCat {{
+        0% {{ transform: translate(0px, 0px); }}
+        100% {{ transform: translate({random.randint(-200, 200)}px, {random.randint(-200, 200)}px); }}
+    }}
+
+    .floating-cat {{
+        position: fixed;
+        top: {top}%;
+        left: {left}%;
+        width: 100px;
+        z-index: 9999;
+        animation: floatCat {duration}s infinite alternate ease-in-out;
+        pointer-events: none;
+    }}
+    </style>
+    <img src="data:image/png;base64,{st.image(cat_image_path, output_format='PNG', use_column_width=False).data.decode('utf-8') if cat_image_path.endswith('.png') else ''}" class="floating-cat"/>
+    """, unsafe_allow_html=True)
+
 
 # Custom CSS
 st.markdown("""
