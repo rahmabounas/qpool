@@ -640,13 +640,24 @@ if not df.empty:
         with st.expander("📘 Competition Descriptions"):
             st.dataframe(desc_df)
 
-# Manual Refresh Button
-if st.button("🔄 Refresh Data", key="refresh"):
-    st.cache_data.clear()
-    st.rerun()
+bcol1, bcol2 = st.columns(2)
+with bcol1:
+    # Manual Refresh Button
+    if st.button("🔄 Refresh Data", key="refresh"):
+        st.cache_data.clear()
+        st.rerun()
 
-if st.button("🐱 Release The Beast", key="beast"):
-    # HTML and CSS for floating and clickable image
+with bcol2:
+# Initialize session state
+if "beast_visible" not in st.session_state:
+    st.session_state.beast_visible = True  # Shown by default
+
+# Toggle button
+if st.button("🐱 Hide The Beast" if st.session_state.beast_visible else "🐱 Release The Beast", key="toggle_beast"):
+    st.session_state.beast_visible = not st.session_state.beast_visible
+
+# Display the beast if visible
+if st.session_state.beast_visible:
     st.markdown(f"""
         <style>
         @keyframes floatCat {{
