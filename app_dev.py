@@ -379,6 +379,49 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+    <style>
+    .breaking-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: red;
+        color: white;
+        overflow: hidden;
+        height: 40px;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+    }
+
+    .breaking-text {
+        display: inline-block;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: scroll-left 15s linear infinite;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    @keyframes scroll-left {
+        0%   { transform: translateX(0%); }
+        100% { transform: translateX(-100%); }
+    }
+
+    /* Push content down */
+    .main .block-container {
+        padding-top: 50px;
+    }
+    </style>
+
+    <div class="breaking-wrapper">
+        <div class="breaking-text">
+            🚨 BREAKING: Devs forget about testnet! 🚨 BREAKING: Devs forget about testnet! 🚨 BREAKING: Devs forget about testnet!
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
 
 # Metric Cards (Top Row)
 if not df.empty:
