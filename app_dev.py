@@ -40,37 +40,40 @@ st.set_page_config(
     layout="wide"
 )
 
-
-# Inject HTML, CSS, and JS
+# HTML and CSS for floating and clickable image
 st.markdown(f"""
     <style>
-    @keyframes waveMove {{
-        0% {{ transform: translate(0vw, 0px); }}
-        25% {{ transform: translate(25vw, -30px); }}
-        50% {{ transform: translate(50vw, 0px); }}
-        75% {{ transform: translate(75vw, 30px); }}
-        100% {{ transform: translate(100vw, 0px); }}
+    @keyframes floatCat {{
+        0% {{ transform: translate(0, 0); }}
+        100% {{ transform: translate({move_x}px, {move_y}px); }}
     }}
 
     .floating-cat {{
         position: fixed;
-        top: 30%;
-        left: 0;
+        top: {top}%;
+        left: {left}%;
         width: 100px;
-        animation: waveMove 10s linear forwards;
         z-index: 9999;
+        animation: floatCat {duration}s ease-in-out infinite alternate;
         cursor: pointer;
+    }}
+
+    .cat-message {{
+        display: none;
+        position: fixed;
+        top: {top + 5}%;
+        left: {left + 5}%;
+        font-size: 20px;
+        background-color: #fff7dc;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #999;
+        z-index: 9999;
     }}
     </style>
 
-    // Automatically hide the cat after animation completes (~10s)
-    setTimeout(function() {{
-        var cat = document.getElementById("cat-img");
-        if (cat) {{
-            cat.style.display = 'none';
-        }}
-    }}, 10000); // 10 seconds = 2 full wave cycles
-    </script>
+    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat" onclick="document.getElementById('cat-msg').style.display='block';"/>
+    <div id="cat-msg" class="cat-message">😺 You found the floating cat!</div>
 """, unsafe_allow_html=True)
 
 # Custom CSS
