@@ -15,7 +15,7 @@ GITHUB_RAW_URL = "http://66.179.92.83/data/qpool_V1.csv"
 REFRESH_INTERVAL = 5  # seconds
 
 # Encode the cat image to base64
-cat_image_path = "data/matilda.png"
+cat_image_path = "data/matilda.jpg"
 with open(cat_image_path, "rb") as img_file:
     encoded_cat = base64.b64encode(img_file.read()).decode("utf-8")
 
@@ -73,7 +73,7 @@ st.markdown(f"""
     }}
     </style>
 
-    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat" onclick="document.getElementById('cat-msg').style.display='block';"/>
+    <img src="data:image/jpg;base64,{encoded_cat}" class="floating-cat" onclick="document.getElementById('cat-msg').style.display='block';"/>
     <div id="cat-msg" class="cat-message">😺 You found the floating cat!</div>
 """, unsafe_allow_html=True)
 
