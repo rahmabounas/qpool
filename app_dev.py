@@ -269,9 +269,10 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     results = []
     descriptions = []
 
-    def add_stat(name, score, date, desc, epoch):
+    def add_stat(name, score, date, desc, epoch="N/A"):
         results.append({"Competition": name, "Score": score, "Date": str(date), "Epoch": epoch})
         descriptions.append({"Competition": name, "Description": desc})
+
 
     # 1. Pool Hashrate ATH
     ath = df["pool_hashrate"].max()
@@ -312,7 +313,7 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     if len(block_changes) >= 3:
         min_diff = (block_changes.diff(2)).min()
         short_span_time = block_changes.iloc[2]
-        add_stat("Lightning Round", f"3 blocks in {min_diff}", short_span_time, "Fastest time to mine 3 blocks.")
+        add_stat("Lightning Round", f"3 blocks in {min_diff}", short_span_time, "Fastest time to mine 3 blocks.", "N/A")
     else:
         add_stat("Lightning Round", "Insufficient data", "N/A", "Fastest time to mine 3 blocks.")
 
@@ -378,7 +379,7 @@ if not df.empty:
     
 
     
-    tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "Qubic Hall of Fame"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "Hall of Fame"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
