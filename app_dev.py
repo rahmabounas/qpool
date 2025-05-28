@@ -7,14 +7,26 @@ import ccxt
 import numpy as np
 from datetime import datetime, timedelta
 from plotly.subplots import make_subplots
+import base64
 import random
 
 # Configuration
 GITHUB_RAW_URL = "http://66.179.92.83/data/qpool_V1.csv"
 REFRESH_INTERVAL = 5  # seconds
 
-# Load the image path
+# Encode the cat image to base64
 cat_image_path = "data/matilda.png"
+with open(cat_image_path, "rb") as img_file:
+    encoded_cat = base64.b64encode(img_file.read()).decode("utf-8")
+
+# Random initial position
+top = random.randint(10, 80)
+left = random.randint(10, 80)
+
+# Random animation movement
+move_x = random.randint(-100, 100)
+move_y = random.randint(-100, 100)
+duration = random.randint(6, 12)
 
 # Generate random position and animation duration
 top = random.randint(10, 80)
@@ -29,12 +41,12 @@ st.set_page_config(
 )
 
 
-# Display the image using HTML with animation
+# HTML and CSS for floating and clickable image
 st.markdown(f"""
     <style>
     @keyframes floatCat {{
-        0% {{ transform: translate(0px, 0px); }}
-        100% {{ transform: translate({random.randint(-200, 200)}px, {random.randint(-200, 200)}px); }}
+        0% {{ transform: translate(0, 0); }}
+        100% {{ transform: translate({move_x}px, {move_y}px); }}
     }}
 
     .floating-cat {{
@@ -43,13 +55,27 @@ st.markdown(f"""
         left: {left}%;
         width: 100px;
         z-index: 9999;
-        animation: floatCat {duration}s infinite alternate ease-in-out;
-        pointer-events: none;
+        animation: floatCat {duration}s ease-in-out infinite alternate;
+        cursor: pointer;
+    }}
+
+    .cat-message {{
+        display: none;
+        position: fixed;
+        top: {top + 5}%;
+        left: {left + 5}%;
+        font-size: 20px;
+        background-color: #fff7dc;
+        padding: 10px 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #999;
+        z-index: 9999;
     }}
     </style>
-    <img src="data:image/png;base64,{st.image(cat_image_path, output_format='PNG', use_column_width=False).data.decode('utf-8') if cat_image_path.endswith('.png') else ''}" class="floating-cat"/>
-    """, unsafe_allow_html=True)
 
+    <img src="data:image/png;base64,{encoded_cat}" class="floating-cat" onclick="document.getElementById('cat-msg').style.display='block';"/>
+    <div id="cat-msg" class="cat-message">😺 You found the floating cat!</div>
+""", unsafe_allow_html=True)
 
 # Custom CSS
 st.markdown("""
