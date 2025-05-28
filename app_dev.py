@@ -12,7 +12,7 @@ import random
 
 # Configuration
 GITHUB_RAW_URL = "http://66.179.92.83/data/qpool_V1.csv"
-REFRESH_INTERVAL = 5  # seconds
+REFRESH_INTERVAL = 1  # seconds
 
 # Encode the cat image to base64
 cat_image_path = "data/matilda.jpg"
