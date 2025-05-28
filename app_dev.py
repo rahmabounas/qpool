@@ -648,54 +648,54 @@ with bcol1:
         st.rerun()
 
 with bcol2:
-# Initialize session state
-if "beast_visible" not in st.session_state:
-    st.session_state.beast_visible = True  # Shown by default
-
-# Toggle button
-if st.button("🐱 Hide The Beast" if st.session_state.beast_visible else "🐱 Release The Beast", key="toggle_beast"):
-    st.session_state.beast_visible = not st.session_state.beast_visible
-
-# Display the beast if visible
-if st.session_state.beast_visible:
-    st.markdown(f"""
-        <style>
-        @keyframes floatCat {{
-            0% {{ transform: translate(0, 0); }}
-            100% {{ transform: translate({move_x}px, {move_y}px); }}
-        }}
+    # Initialize session state
+    if "beast_visible" not in st.session_state:
+        st.session_state.beast_visible = True  # Shown by default
     
-        .floating-cat {{
-            position: fixed;
-            top: {top}%;
-            left: {left}%;
-            width: 100px;
-            z-index: 9999;
-            animation: floatCat {duration}s ease-in-out infinite alternate;
-            cursor: pointer;
-            border-radius: 50%;
-            object-fit: cover;
-        }}
+    # Toggle button
+    if st.button("🐱 Hide The Beast" if st.session_state.beast_visible else "🐱 Release The Beast", key="toggle_beast"):
+        st.session_state.beast_visible = not st.session_state.beast_visible
     
-        .cat-message {{
-            display: none;
-            position: fixed;
-            top: {top + 5}%;
-            left: {left + 5}%;
-            font-size: 20px;
-            background-color: #fff7dc;
-            padding: 10px 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #999;
-            z-index: 9999;
-        }}
-        </style>
-    
-        <a href="https://matildaonqubic.com/" target="_blank">
-        <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
-           title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
-        </a>
-    """, unsafe_allow_html=True)
+    # Display the beast if visible
+    if st.session_state.beast_visible:
+        st.markdown(f"""
+            <style>
+            @keyframes floatCat {{
+                0% {{ transform: translate(0, 0); }}
+                100% {{ transform: translate({move_x}px, {move_y}px); }}
+            }}
+        
+            .floating-cat {{
+                position: fixed;
+                top: {top}%;
+                left: {left}%;
+                width: 100px;
+                z-index: 9999;
+                animation: floatCat {duration}s ease-in-out infinite alternate;
+                cursor: pointer;
+                border-radius: 50%;
+                object-fit: cover;
+            }}
+        
+            .cat-message {{
+                display: none;
+                position: fixed;
+                top: {top + 5}%;
+                left: {left + 5}%;
+                font-size: 20px;
+                background-color: #fff7dc;
+                padding: 10px 20px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px #999;
+                z-index: 9999;
+            }}
+            </style>
+        
+            <a href="https://matildaonqubic.com/" target="_blank">
+            <img src="data:image/png;base64,{encoded_cat}" class="floating-cat"
+               title="Hello! I'm Matilda the Satoshi’s Cat. In my idle time, I chase Monero blocks. 🐱" />
+            </a>
+        """, unsafe_allow_html=True)
 
 
 # Footer
