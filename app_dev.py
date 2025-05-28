@@ -441,7 +441,7 @@ if not df.empty:
             with col2b:
                 st.markdown(f"""
                 <div class="metric-card">
-                    <div class="metric-title>"Mean Hashrate (last 6h)</div>
+                    <div class="metric-title>Mean Hashrate (last 6h)</div>
                     <div class="metric-value">{mean_hash_6h:.2f} MH/s</div>
                 </div>
                 """, unsafe_allow_html=True)
