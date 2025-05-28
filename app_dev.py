@@ -296,13 +296,7 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     marathon_time = blocks_week.idxmax()
     add_stat("Marathon", f"{marathon} blocks", marathon_time, "Most blocks found in a week.")
 
-    # 6. Ultra Marathon (month)
-    blocks_month = df.groupby("month")["pool_blocks_found"].max()
-    ultra = blocks_month.max()
-    ultra_time = blocks_month.idxmax()
-    add_stat("Ultra Marathon", f"{ultra} blocks", ultra_time, "Most blocks found in a month.")
-
-    # 7. Lightning Round (shortest 3 blocks found)
+    # 6. Lightning Round (shortest 3 blocks found)
     block_changes = df[df["pool_blocks_found"].diff() > 0]["timestamp"]
     if len(block_changes) >= 3:
         min_diff = (block_changes.diff(2)).min()
@@ -311,54 +305,7 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     else:
         add_stat("Lightning Round", "Insufficient data", "N/A", "Fastest time to mine 3 blocks.")
 
-    # 8. Dry Spell (longest gap between blocks)
-    block_times = df[df["pool_blocks_found"].diff() > 0]["timestamp"]
-    if len(block_times) >= 2:
-        dry_spell = block_times.diff().max()
-        dry_time = block_times[block_times.diff() == dry_spell].iloc[0]
-        add_stat("Dry Spell", f"No block for {dry_spell}", dry_time, "Longest time without finding a block.")
-    else:
-        add_stat("Dry Spell", "Insufficient data", "N/A", "Longest time without finding a block.")
-
-    # 9. Golden Hour (most estimated reward in 1 hour)
-    df["reward_est"] = df["pool_blocks_found"].diff().clip(lower=0) * df["close"]
-    reward_hour = df.groupby("hour")["reward_est"].sum()
-    golden_hour_val = reward_hour.max()
-    golden_hour_time = reward_hour.idxmax()
-    add_stat("Golden Hour", f"{golden_hour_val:.2f} QUBIC", golden_hour_time, "Most QUBIC rewards estimated in 1 hour.")
-
-    # 10. Lucky Shot (biggest single block reward)
-    if not df["reward_est"].isna().all():
-        lucky_val = df["reward_est"].max()
-        lucky_time = df[df["reward_est"] == lucky_val]["timestamp"].iloc[0]
-        add_stat("Lucky Shot", f"{lucky_val:.2f} QUBIC", lucky_time, "Highest estimated reward from a single block.")
-
-    # 11. Ghostbuster (uncle blocks, not tracked)
-    add_stat("Ghostbuster", "N/A", "N/A", "Most uncle blocks processed (data unavailable).")
-
-    # 12. Hash Surge (biggest 1h % gain)
-    df["hashrate_diff"] = df["pool_hashrate"].pct_change()
-    hash_surge = df["hashrate_diff"].max()
-    if pd.notnull(hash_surge):
-        surge_time = df[df["hashrate_diff"] == hash_surge]["timestamp"].iloc[0]
-        add_stat("Hash Surge", f"{hash_surge:.2%}", surge_time, "Largest % increase in hashrate.")
-    else:
-        add_stat("Hash Surge", "N/A", "N/A", "Largest % increase in hashrate.")
-
-    # 13. Grind King (longest block streak)
-    block_found = df["pool_blocks_found"].diff().fillna(0) > 0
-    streaks = (block_found != block_found.shift()).cumsum()
-    longest_streak = block_found.groupby(streaks).sum().max()
-    if longest_streak > 0:
-        streak_time = df.loc[block_found.groupby(streaks).sum().idxmax(), "timestamp"]
-        add_stat("Grind King", f"{int(longest_streak)} blocks", streak_time, "Longest uninterrupted block finding streak.")
-    else:
-        add_stat("Grind King", "N/A", "N/A", "Longest uninterrupted block finding streak.")
-
-    # 14. Team Effort (not available)
-    add_stat("Team Effort", "N/A", "N/A", "Most miners online at once (not tracked).")
-
-    # 15. Power Hour (highest average hashrate in 1h)
+    # 7. Power Hour (highest average hashrate in 1h)
     hash_hour = df.groupby("hour")["pool_hashrate"].mean()
     power_val = hash_hour.max()
     power_time = hash_hour.idxmax()
