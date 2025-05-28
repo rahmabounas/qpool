@@ -277,8 +277,9 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     # 1. Pool Hashrate ATH
     ath = df["pool_hashrate"].max()
     ath_time = df[df["pool_hashrate"] == ath]["timestamp"].iloc[0]
-    ath_epoch = df[df["timestamp"] == ath_time]["qubic_epoch"].iloc[0]
-    add_stat("Pool Hashrate ATH", f"{ath:,.0f}", ath_time, "Highest recorded hashrate of the pool.", ath_epoch)
+    ath_mhs = ath / 1_000_000
+    add_stat("Pool Hashrate ATH", f"{ath_mhs:,.2f} MH/s", ath_time, "HHashrate All Time High", epoch="N/A")
+    
 
     # 2. Sprint (1h)
     blocks_1h = block_gains.groupby("hour")["blocks_delta"].sum()
@@ -321,7 +322,7 @@ def generate_funny_pool_stats(df: pd.DataFrame):
     hash_hour = df.groupby("hour")["pool_hashrate"].mean()
     power_val = hash_hour.max()
     power_time = hash_hour.idxmax()
-    add_stat("Power Hour", f"{power_val:,.0f}", power_time, "Hour with the highest average hashrate.")
+    add_stat("Pool Hashrate Power Hour", f"{power_val:,.2f} MH/s", power_time, "Hour with the highest average hashrate.")
 
     results_df = pd.DataFrame(results)
     descriptions_df = pd.DataFrame(descriptions)
