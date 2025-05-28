@@ -263,42 +263,49 @@ def generate_funny_pool_stats(df: pd.DataFrame):
 
     # Calculate delta in blocks (assumes pool_blocks_found is cumulative)
     df["blocks_delta"] = df["pool_blocks_found"].diff().fillna(0)
-
+    # Only positive block increases matter
+    block_gains = df[df["blocks_delta"] > 0].copy()
+    
     results = []
     descriptions = []
 
-    def add_stat(name, score, date, desc):
-        results.append({"Competition": name, "Score": score, "Date": str(date)})
+    def add_stat(name, score, date, desc, epoch):
+        results.append({"Competition": name, "Score": score, "Date": str(date), "Epoch": epoch})
         descriptions.append({"Competition": name, "Description": desc})
 
     # 1. Pool Hashrate ATH
     ath = df["pool_hashrate"].max()
     ath_time = df[df["pool_hashrate"] == ath]["timestamp"].iloc[0]
-    add_stat("Pool Hashrate ATH", f"{ath:,.0f}", ath_time, "Highest recorded hashrate of the pool.")
+    ath_epoch = df[df["timestamp"] == ath_time]["qubic_epoch"].iloc[0]
+    add_stat("Pool Hashrate ATH", f"{ath:,.0f}", ath_time, "Highest recorded hashrate of the pool.", ath_epoch)
 
     # 2. Sprint (1h)
-    blocks_1h = df.groupby("hour")["blocks_delta"].sum()
+    blocks_1h = block_gains.groupby("hour")["blocks_delta"].sum()
     sprint = blocks_1h.max()
     sprint_time = blocks_1h.idxmax()
-    add_stat("Sprint", f"{int(sprint)} blocks", sprint_time, "Most blocks found in a single hour.")
-
+    sprint_epoch = df[df["timestamp"].dt.floor("h") == sprint_time]["qubic_epoch"].mode()[0]
+    add_stat("Sprint", f"{int(sprint)} blocks", sprint_time, "Most blocks found in a single hour.", sprint_epoch)
+    
     # 3. Mid-distance (4h)
-    blocks_4h = df.groupby("4h")["blocks_delta"].sum()
+    blocks_4h = block_gains.groupby("4h")["blocks_delta"].sum()
     mid = blocks_4h.max()
     mid_time = blocks_4h.idxmax()
-    add_stat("Mid-distance", f"{int(mid)} blocks", mid_time, "Most blocks found in a 4-hour window.")
-
+    mid_epoch = df[df["timestamp"].dt.floor("4h") == mid_time]["qubic_epoch"].mode()[0]
+    add_stat("Mid-distance", f"{int(mid)} blocks", mid_time, "Most blocks found in a 4-hour window.", mid_epoch)
+    
     # 4. Long-distance (24h)
-    blocks_day = df.groupby("day")["blocks_delta"].sum()
+    blocks_day = block_gains.groupby("day")["blocks_delta"].sum()
     long_dist = blocks_day.max()
     long_time = blocks_day.idxmax()
-    add_stat("Long-distance", f"{int(long_dist)} blocks", long_time, "Most blocks found in 24 hours.")
-
+    long_epoch = df[df["timestamp"].dt.floor("d") == long_time]["qubic_epoch"].mode()[0]
+    add_stat("Long-distance", f"{int(long_dist)} blocks", long_time, "Most blocks found in 24 hours.", long_epoch)
+    
     # 5. Marathon (week)
-    blocks_week = df.groupby("week")["blocks_delta"].sum()
+    blocks_week = block_gains.groupby("week")["blocks_delta"].sum()
     marathon = blocks_week.max()
     marathon_time = blocks_week.idxmax()
-    add_stat("Marathon", f"{int(marathon)} blocks", marathon_time, "Most blocks found in a week.")
+    marathon_epoch = df[df["timestamp"].dt.to_period("W").dt.start_time == marathon_time]["qubic_epoch"].mode()[0]
+    add_stat("Marathon", f"{int(marathon)} blocks", marathon_time, "Most blocks found in a week.", marathon_epoch)
 
     # 6. Lightning Round (shortest time to mine 3 blocks)
     block_changes = df[df["blocks_delta"] > 0]["timestamp"]
