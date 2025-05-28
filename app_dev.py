@@ -56,6 +56,8 @@ st.markdown(f"""
         z-index: 9999;
         animation: floatCat {duration}s ease-in-out infinite alternate;
         cursor: pointer;
+        border-radius: 50%;
+        object-fit: cover;
     }}
 
     .cat-message {{
