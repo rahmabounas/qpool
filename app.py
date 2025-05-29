@@ -434,6 +434,17 @@ if not df.empty:
                     yaxis='y2',
                     hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
                 ))
+                # Convert to MH/s
+                ath_val_mhs = ath_val / 1e6
+                
+                fig.add_hline(
+                    y=ath_val_mhs,
+                    line_dash="longdash",
+                    line_color="gold",
+                    annotation_text=f"ATH: {ath_val_mhs:,.0f} MH/s",
+                    annotation_position="top left",
+                    annotation_font_color="gold"
+                )
                 blocks = df_chart[df_chart['block_found']]
                 fig.add_trace(go.Scatter(
                     x=blocks['timestamp'],
