@@ -434,11 +434,22 @@ if not df.empty:
                     yaxis='y2',
                     hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
                 ))
-                # Convert to MH/s
-                ath_val_mhs = ath_val / 1e6
+
                 
 
                 blocks = df_chart[df_chart['block_found']]
+                fig.add_trace(go.Scatter(
+                    x=blocks['timestamp'],
+                    y=blocks['pool_hashrate_mhs'],
+                    mode='markers',
+                    name='Block Found',
+                    marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
+                    hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
+                ))
+                
+                # Convert to MH/s
+                ath_val_mhs = ath_val / 1e6
+                
                 if not use_log_scale:
                     fig.add_hline(
                         y=ath_val_mhs,
