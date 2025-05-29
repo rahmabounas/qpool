@@ -342,7 +342,8 @@ if not df.empty:
     
 
     
-    tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "Hall of Fame"])
+    #tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "Hall of Fame"])
+    tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
     with tab1: 
         col1, col2 = st.columns([1,3])
         with col1:
@@ -635,13 +636,7 @@ if not df.empty:
             )
         else:
             st.warning("No token burn data available.")
-    with tab4:
-        stats_df, desc_df = generate_funny_pool_stats(df)
-        st.subheader("🥇 World Record Table")
-        st.dataframe(stats_df)
-        
-        with st.expander("📘 Competition Descriptions"):
-            st.dataframe(desc_df)
+
 
 bcol1, bcol2 = st.columns(2)
 with bcol1:
