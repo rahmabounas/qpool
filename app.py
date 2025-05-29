@@ -411,7 +411,11 @@ if not df.empty:
                     <div class="metric-value">{format_hashrate(latest['network_hashrate'])}</div>
                 </div>
                 """, unsafe_allow_html=True)
+
             # Hashrate Chart
+            # Toggle for log scale
+            use_log_scale = st.toggle("Use Log Scale", value=False)
+            
             if not df.empty:
                 df_chart = downsample(df)
                 fig = go.Figure()
@@ -430,17 +434,6 @@ if not df.empty:
                     yaxis='y2',
                     hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Network: %{y:.2f} GH/s<extra></extra>'
                 ))
-                # Convert to MH/s
-                ath_val_mhs = ath_val / 1e6
-                
-                fig.add_hline(
-                    y=ath_val_mhs,
-                    line_dash="longdash",
-                    line_color="gold",
-                    annotation_text=f"ATH: {ath_val_mhs:,.0f} MH/s",
-                    annotation_position="top left",
-                    annotation_font_color="gold"
-                )
                 blocks = df_chart[df_chart['block_found']]
                 fig.add_trace(go.Scatter(
                     x=blocks['timestamp'],
@@ -450,14 +443,16 @@ if not df.empty:
                     marker=dict(symbol='star', size=12, color='gold', line=dict(width=1, color='black')),
                     hovertemplate='%{x|%Y-%m-%d %H:%M}<br>Block Found<extra></extra>'
                 ))
+            
                 # Calculate the time range for the last 24 hours
                 end_time = df_chart['timestamp'].max()
                 start_time = end_time - timedelta(hours=24)
+            
                 fig.update_layout(
                     xaxis=dict(
                         title='Time',
                         gridcolor='rgba(255,255,255,0.1)',
-                        range=[start_time, end_time],  # This is what limits it to last 24h
+                        range=[start_time, end_time],
                         rangeslider=dict(visible=True, thickness=0.1),
                         rangeselector=dict(
                             buttons=list([
@@ -473,9 +468,19 @@ if not df.empty:
                         ),
                         type='date'
                     ),
-                    yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
-                    yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
-                    margin=dict(t=5, b=10, l=10, r=10),  # Top, bottom, left, right
+                    yaxis=dict(
+                        title='Pool Hashrate (MH/s)',
+                        gridcolor='rgba(255,255,255,0.1)',
+                        type='log' if use_log_scale else 'linear'
+                    ),
+                    yaxis2=dict(
+                        title='Network Hashrate (GH/s)',
+                        overlaying='y',
+                        side='right',
+                        gridcolor='rgba(255,255,255,0.1)',
+                        type='log' if use_log_scale else 'linear'
+                    ),
+                    margin=dict(t=5, b=10, l=10, r=10),
                     height=330,
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
@@ -487,6 +492,7 @@ if not df.empty:
                 st.plotly_chart(fig, use_container_width=True)
             else:
                 st.info("No hashrate data available.")
+            
             st.markdown('</div>', unsafe_allow_html=True)
         
         with tab2:
