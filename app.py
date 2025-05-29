@@ -648,16 +648,8 @@ with bcol1:
         st.rerun()
 
 with bcol2:
-    # Initialize session state
-    if "beast_visible" not in st.session_state:
-        st.session_state.beast_visible = True  # Shown by default
-    
     # Toggle button
-    if st.button("🐱 Hide The Beast" if st.session_state.beast_visible else "🐱 Release The Beast", key="toggle_beast"):
-        st.session_state.beast_visible = not st.session_state.beast_visible
-    
-    # Display the beast if visible
-    if st.session_state.beast_visible:
+    if st.button("🐱 Release The Beast", key="toggle_beast"):
         st.markdown(f"""
             <style>
             @keyframes floatCat {{
