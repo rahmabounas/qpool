@@ -418,6 +418,11 @@ if not df.empty:
             
             if not df.empty:
                 df_chart = downsample(df)
+
+                # Sanitaze for log
+                df_chart['pool_hashrate_mhs'] = df_chart['pool_hashrate_mhs'].clip(lower=1e-1)
+                df_chart['network_hashrate_ghs'] = df_chart['network_hashrate_ghs'].clip(lower=1e-1)
+
                 fig = go.Figure()
                 fig.add_trace(go.Scatter(
                     x=df_chart['timestamp'],
