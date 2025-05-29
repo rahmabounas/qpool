@@ -502,7 +502,7 @@ if not df.empty:
                         type='log' if use_log_scale else 'linear'
                     ),
                     margin=dict(t=5, b=10, l=10, r=10),
-                    height=330,
+                    height=400,
                     plot_bgcolor='rgba(0,0,0,0)',
                     paper_bgcolor='rgba(0,0,0,0)',
                     font=dict(color='white'),
