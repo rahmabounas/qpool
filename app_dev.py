@@ -455,6 +455,9 @@ if not df.empty:
                         rangeslider=dict(visible=True, thickness=0.1),
                         rangeselector=dict(
                             buttons=list([
+                                dict(count=1, label="1h", step="hour", stepmode="backward"),
+                                dict(count=6, label="6h", step="hour", stepmode="backward"),
+                                dict(count=12, label="12h", step="hour", stepmode="backward"),
                                 dict(count=24, label="24h", step="hour", stepmode="backward"),
                                 dict(step="all", label="All")
                             ]),
