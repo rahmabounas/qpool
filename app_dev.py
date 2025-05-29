@@ -445,6 +445,7 @@ if not df.empty:
                     xaxis=dict(
                         title='Time',
                         gridcolor='rgba(255,255,255,0.1)',
+                        type='log',
                         range=[start_time, end_time],  # This is what limits it to last 24h
                         rangeslider=dict(visible=True, thickness=0.1),
                         rangeselector=dict(
@@ -459,7 +460,7 @@ if not df.empty:
                         type='date'
                     ),
                     yaxis=dict(title='Pool Hashrate (MH/s)', gridcolor='rgba(255,255,255,0.1)'),
-                    yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)', type='log'),
+                    yaxis2=dict(title='Network Hashrate (GH/s)', overlaying='y', side='right', gridcolor='rgba(255,255,255,0.1)'),
                     margin=dict(t=5, b=10, l=10, r=10),  # Top, bottom, left, right
                     height=330,
                     plot_bgcolor='rgba(0,0,0,0)',
