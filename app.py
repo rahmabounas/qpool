@@ -437,18 +437,11 @@ if not df.empty:
                 # Convert to MH/s
                 ath_val_mhs = ath_val / 1e6
                 
-                fig.add_hline(
-                    y=ath_val_mhs,
-                    line_dash="longdash",
-                    line_color="gold",
-                    annotation_text=f"ATH: {ath_val_mhs:,.0f} MH/s",
-                    annotation_position="top left",
-                    annotation_font_color="gold"
-                )
+
                 blocks = df_chart[df_chart['block_found']]
                 fig.add_hline(
                     y=ath_val_mhs,
-                    line_dash="dot" if use_log_scale else "longdash",
+                    line_dash="longdash" if use_log_scale else "longdash",
                     line_color="gold",
                     annotation_text=f"ATH ({'log' if use_log_scale else 'linear'}): {ath_val_mhs:,.0f} MH/s",
                     annotation_position="top left",
