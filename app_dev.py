@@ -610,14 +610,16 @@ if not df.empty:
     
             st.markdown("### 📈 Burn History (Last 30 Days)")
             recent_burns = df_burn[df_burn['timestamp'] > (datetime.now() - timedelta(days=30))]
+            # Make sure timestamps are datetime and timezone-aware in UTC
+            recent_burns['timestamp'] = pd.to_datetime(recent_burns['timestamp'], utc=True)
     
-            # Define the starting point of epoch 162
+            # Define the starting point of epoch 162 (timezone-aware)
             epoch_162_start = pd.Timestamp('2025-05-28 12:00:00', tz='UTC')
             
-            # Compute the epoch number for each row
+            # Compute the epoch number
             def compute_epoch_number(ts):
-                delta = epoch_162_start - ts
-                weeks_offset = -int(delta.total_seconds() // (7 * 24 * 3600))
+                delta = ts - epoch_162_start
+                weeks_offset = int(delta.total_seconds() // (7 * 24 * 3600))
                 return 162 + weeks_offset
             
             recent_burns['epoch'] = recent_burns['timestamp'].apply(compute_epoch_number)
