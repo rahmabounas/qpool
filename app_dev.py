@@ -611,17 +611,34 @@ if not df.empty:
             st.markdown("### 📈 Burn History (Last 30 Days)")
             recent_burns = df_burn[df_burn['timestamp'] > (datetime.now() - timedelta(days=30))]
     
+            # Define the starting point of epoch 162
+            epoch_162_start = pd.Timestamp('2025-05-28 12:00:00', tz='UTC')
+            
+            # Compute the epoch number for each row
+            def compute_epoch_number(ts):
+                delta = epoch_162_start - ts
+                weeks_offset = -int(delta.total_seconds() // (7 * 24 * 3600))
+                return 162 + weeks_offset
+            
+            recent_burns['epoch'] = recent_burns['timestamp'].apply(compute_epoch_number)
+            
+            # Optional: group by category (e.g., type/source of burn if exists)
+            # For now, assume only total burn per epoch
+            burn_by_epoch = recent_burns.groupby('epoch')['qubic_amount'].sum().reset_index()
+            
+            # Create the stacked bar chart (single category, so just one trace)
             fig_burn = go.Figure()
             fig_burn.add_trace(go.Bar(
-                x=recent_burns['timestamp'],
-                y=recent_burns['qubic_amount'],
+                x=burn_by_epoch['epoch'],
+                y=burn_by_epoch['qubic_amount'],
                 name='QUBIC Burned',
                 marker_color='crimson',
-                hovertemplate='%{x|%Y-%m-%d %H:%M}<br>%{y:,.0f} QUBIC<extra></extra>'
+                hovertemplate='Epoch %{x}<br>%{y:,.0f} QUBIC<extra></extra>'
             ))
-    
+            
             fig_burn.update_layout(
-                xaxis_title="Date",
+                barmode='stack',
+                xaxis_title="Epoch",
                 yaxis_title="QUBIC Burned",
                 plot_bgcolor='rgba(0,0,0,0)',
                 paper_bgcolor='rgba(0,0,0,0)',
@@ -629,6 +646,7 @@ if not df.empty:
                 margin=dict(l=20, r=20, t=30, b=30),
                 height=300
             )
+            
             st.plotly_chart(fig_burn, use_container_width=True)
                 
             latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
