@@ -626,9 +626,9 @@ if not df.empty:
             
             # Optional: group by category (e.g., type/source of burn if exists)
             # For now, assume only total burn per epoch
-            burn_by_epoch = recent_burns.groupby('epoch')['qubic_amount'].sum().reset_index()
+            # Convert epoch numbers to strings so they appear as discrete values
+            burn_by_epoch['epoch'] = burn_by_epoch['epoch'].astype(str)
             
-            # Create the stacked bar chart (single category, so just one trace)
             fig_burn = go.Figure()
             fig_burn.add_trace(go.Bar(
                 x=burn_by_epoch['epoch'],
@@ -648,7 +648,7 @@ if not df.empty:
                 margin=dict(l=20, r=20, t=30, b=30),
                 height=300
             )
-            
+
             st.plotly_chart(fig_burn, use_container_width=True)
                 
             latest_qubic_price = df_chart['qubic_usdt'].iloc[-1] if not df_chart.empty else 0
