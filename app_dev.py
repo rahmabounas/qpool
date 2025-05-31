@@ -622,7 +622,7 @@ if not df.empty:
                 weeks_offset = int(delta.total_seconds() // (7 * 24 * 3600))
                 return 162 + weeks_offset
             
-            recent_burns['epoch'] = recent_burns['timestamp'].apply(compute_epoch_number)
+            burn_by_epoch = recent_burns.groupby('epoch')['qubic_amount'].sum().reset_index() 
             
             # Optional: group by category (e.g., type/source of burn if exists)
             # For now, assume only total burn per epoch
