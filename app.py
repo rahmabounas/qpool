@@ -340,7 +340,39 @@ if not df.empty:
     # Calculate delta in blocks found
     df["blocks_delta"] = df["pool_blocks_found"].diff().fillna(0)
     
-
+    if latest['pool_blocks_found'] == 100:
+        st.balloons()
+        st.markdown("""
+                <style>
+                @keyframes float {
+                    0% { transform: translateY(0); }
+                    100% { transform: translateY(-100vh); opacity: 0; }
+                }
+            
+                .emoji {
+                    position: fixed;
+                    bottom: 0;
+                    animation: float 5s ease-in infinite;
+                    font-size: 36px;
+                }
+            
+                .emoji:nth-child(1) { left: 10%; animation-delay: 0s; }
+                .emoji:nth-child(2) { left: 25%; animation-delay: 1s; }
+                .emoji:nth-child(3) { left: 35%; animation-delay: 2s; }
+                .emoji:nth-child(4) { left: 45%; animation-delay: 3s; }
+                .emoji:nth-child(5) { left: 55%; animation-delay: 4s; }
+                .emoji:nth-child(6) { left: 75%; animation-delay: 5s; }
+                .emoji:nth-child(6) { left: 85%; animation-delay: 6s; }
+                </style>
+            
+                <div class="emoji">🔥</div>
+                <div class="emoji">🎉</div>
+                <div class="emoji">1️⃣</div>
+                <div class="emoji">0️⃣</div>
+                <div class="emoji">0️⃣</div>
+                <div class="emoji">🚀</div>
+                <div class="emoji">🍾</div>
+            """, unsafe_allow_html=True)
     
     #tab1, tab2, tab3, tab4 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns", "Hall of Fame"])
     tab1, tab2, tab3 = st.tabs(["Pool Stats", "QUBIC/XMR", "Token Burns"])
