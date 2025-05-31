@@ -658,6 +658,7 @@ if not df.empty:
                         plot_bgcolor='rgba(0,0,0,0)',
                         paper_bgcolor='rgba(0,0,0,0)',
                         font=dict(color='white'),
+                        xaxis=dict(type='category'),
                         margin=dict(l=20, r=20, t=30, b=30),
                         height=300
                     )
